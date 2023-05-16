@@ -1,6 +1,4 @@
 import styled from "styled-components";
-import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useState } from "react";
 import MainHeader from "../Components/MainHeader";
 import { Outlet } from "react-router-dom";
 const Wrapper = styled.div`

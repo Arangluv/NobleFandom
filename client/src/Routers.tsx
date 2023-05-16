@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Main from "./Pages/Main";
 import MainIndex from "./Pages/MainIndex";
-import Login from "./Pages/LoginPage/UserLogin";
+import UserLogin from "./Pages/LoginPage/UserLogin";
 import WithUs from "./Pages/LoginPage/WithUs";
 import RegisterCreator from "./Pages/LoginPage/RegisterCreator";
 import RegisterPartner from "./Pages/LoginPage/RegisterPartner";
@@ -39,6 +39,9 @@ import Income from "./Components/OnlyCreatorPage/Income";
 import MessageSetting from "./Components/OnlyCreatorPage/MessageSetting";
 import ChatAll from "./Pages/Feed/Share/ChatAll";
 import MembershipPlanSetting from "./Components/OnlyCreatorPage/MembershipPlanSetting";
+import UserJoin from "./Pages/LoginPage/UserJoin";
+import AdminMain from "./Pages/Admin/AdminMain";
+import RegisterList from "./Pages/Admin/RegisterList";
 function Routers() {
   return (
     <BrowserRouter>
@@ -52,9 +55,17 @@ function Routers() {
           <Route path="cardpost" element={<CardPost />} />
         </Route>
         <Route path="/withus" element={<WithUs />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/login" element={<UserLogin />} />
+        <Route path="/join" element={<UserJoin />} />
         <Route path="/register-creator" element={<RegisterCreator />} />
         <Route path="/register-partner" element={<RegisterPartner />} />
+        <Route
+          path={`/${process.env.REACT_APP_ADMIN_DASHBOARD_PANEL}`}
+          element={<AdminMain />}
+        >
+          <Route index element={null} />
+          <Route path="register-list" element={<RegisterList />} />
+        </Route>
         <Route path="/main" element={<FeedMain />}>
           <Route index element={<FeedHome />} />
           <Route path=":userId" element={<PersonalScreen />}>

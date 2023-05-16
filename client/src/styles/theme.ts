@@ -4,7 +4,7 @@ export const theme: DefaultTheme = {
   bgColor: "white",
   textColor: "black",
   accentColor: "#f1c40f",
-  textRedColor: "#eb2f06",
+  textRedColor: "#ff4545",
   textShadow: "#fbc531 0px 0px 5px",
   textShadowThin: "#fbc531 0px 0px 2px",
   boxShadow: "#fff 0px 0px 5px",

@@ -1,8 +1,10 @@
 import { Link } from "react-router-dom";
 import styled from "styled-components";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 import { AiFillFacebook, AiFillGoogleSquare } from "react-icons/ai";
 import { SiKakaotalk } from "react-icons/si";
 import SideBar from "../../Components/SideBar";
+import GoogleLoginBnt from "./GoogleLoginBnt";
 const Wrapper = styled.div`
   width: 100%;
   height: 100vh;
@@ -120,6 +122,7 @@ const SocialLoginBox = styled.div`
     transition: 0.1s ease-in-out;
     &:hover {
       box-shadow: #fbc531 0px 0px 10px;
+      cursor: pointer;
     }
     span {
       margin-left: 1vw;
@@ -147,7 +150,8 @@ const SocialLoginBox = styled.div`
     margin-bottom: 1vw;
   }
 `;
-function Login() {
+function UserLogin() {
+  let googleOauthClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID || "";
   return (
     <Wrapper>
       <SideBar />
@@ -164,17 +168,12 @@ function Login() {
         </LoginToEmailBox>
         <SocialLoginBox>
           <span>SNS로 로그인하기 </span>
-          <button>
-            <AiFillGoogleSquare />
-            <span>구글 로그인</span>
-          </button>
+          <GoogleOAuthProvider clientId={googleOauthClientId}>
+            <GoogleLoginBnt />
+          </GoogleOAuthProvider>
           <button>
             <AiFillFacebook />
             <span>페이스북 로그인</span>
-          </button>
-          <button>
-            <SiKakaotalk />
-            <span>카카오톡 로그인</span>
           </button>
         </SocialLoginBox>
       </SubWrapper>
@@ -182,4 +181,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default UserLogin;
