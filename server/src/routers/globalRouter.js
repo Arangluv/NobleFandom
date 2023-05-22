@@ -2,6 +2,7 @@ import express from "express";
 import {
   googleLogin,
   userJoin,
+  userLogin,
   creatorRegister,
 } from "../controllers/globalController.js";
 import aws from "aws-sdk";
@@ -31,9 +32,8 @@ const imageUploader = multer({
 const globalRouter = express.Router();
 globalRouter.route("/google-login").post(googleLogin);
 globalRouter.route("/join").post(userJoin);
-globalRouter.route("/creator-register").post(
-  // imageUploader.fields([{ name: "evidence_file", maxCount: 5 }]),
-  imageUploader.array("evidence_file"),
-  creatorRegister
-);
+globalRouter
+  .route("/creator-register")
+  .post(imageUploader.array("evidence_file"), creatorRegister);
+globalRouter.route("/login").post(userLogin);
 export default globalRouter;

@@ -5,6 +5,7 @@ export const theme: DefaultTheme = {
   textColor: "black",
   accentColor: "#f1c40f",
   textRedColor: "#ff4545",
+  verifyColor: "#2DCC70",
   textShadow: "#fbc531 0px 0px 5px",
   textShadowThin: "#fbc531 0px 0px 2px",
   boxShadow: "#fff 0px 0px 5px",

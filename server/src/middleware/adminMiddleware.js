@@ -14,7 +14,6 @@ export const inspectAdmin = async (req, res, next) => {
       user.username === "노블팬덤 공식계정" &&
       user.email === "noblefandom@gmail.com"
     ) {
-      console.log("next?");
       next();
     }
   } catch (error) {

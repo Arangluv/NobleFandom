@@ -9,6 +9,7 @@ const applicationFormSchema = new mongoose.Schema({
     },
   ],
   evidenceUrl: [{ type: String, required: true }],
+  processed: { type: Boolean, default: false },
 });
 
 const ApplicationForm = mongoose.model(

@@ -5,6 +5,9 @@ import { AiFillFacebook, AiFillGoogleSquare } from "react-icons/ai";
 import { SiKakaotalk } from "react-icons/si";
 import SideBar from "../../Components/SideBar";
 import GoogleLoginBnt from "./GoogleLoginBnt";
+import { useForm } from "react-hook-form";
+import axios from "axios";
+import BASE_URL from "../../url";
 const Wrapper = styled.div`
   width: 100%;
   height: 100vh;
@@ -37,7 +40,7 @@ const LoginToEmailBox = styled.div`
     flex-direction: column;
     margin-top: 2vw;
     input[type="password"],
-    input[type="email"] {
+    input[type="text"] {
       margin-bottom: 1vw;
       background-color: black;
       padding: 1vw;
@@ -48,6 +51,14 @@ const LoginToEmailBox = styled.div`
       box-shadow: ${(props) => props.theme.textShadow};
       color: white;
       transition: 0.1s ease-in-out;
+    }
+    small {
+      margin-bottom: 1vw;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.1vw;
+      color: ${(props) => props.theme.textRedColor};
     }
     input::placeholder {
       color: white;
@@ -150,17 +161,64 @@ const SocialLoginBox = styled.div`
     margin-bottom: 1vw;
   }
 `;
+interface DataProps {
+  email: string;
+  password: string;
+  extraError?: string;
+}
 function UserLogin() {
+  const { register, watch, formState, setError, handleSubmit, clearErrors } =
+    useForm<DataProps>();
   let googleOauthClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID || "";
+  console.log(formState.errors);
+  const onValid = async (data: DataProps) => {
+    console.log("submit ");
+    await axios
+      .post(`${BASE_URL}/login`, {
+        email: data.email,
+        password: data.password,
+      })
+      .then((result) => console.log(result))
+      .catch((error) => {
+        setError("extraError", {
+          message: error.response.data.message,
+        });
+      });
+  };
   return (
     <Wrapper>
       <SideBar />
       <SubWrapper>
         <LoginToEmailBox>
           <Link to="/">NOBLE FANDOM</Link>
-          <form>
-            <input type="email" placeholder="이메일" />
-            <input type="password" placeholder="비밀번호" />
+          <form onSubmit={handleSubmit(onValid)}>
+            <input
+              {...register("email", {
+                required: "이메일을 입력해주세요",
+                pattern: {
+                  value: /^[a-zA-Z0-9+-\_.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/,
+                  message: "이메일 형식이 아닙니다",
+                },
+              })}
+              onFocus={() => clearErrors("extraError")}
+              type="text"
+              placeholder="이메일"
+            />
+            <input
+              {...register("password", {
+                required: "비밀번호를 입력해주세요",
+              })}
+              onFocus={() => clearErrors("extraError")}
+              type="password"
+              placeholder="비밀번호"
+            />
+            {formState.errors ? (
+              <small>
+                {formState.errors?.email?.message ||
+                  formState.errors?.password?.message ||
+                  formState.errors?.extraError?.message}
+              </small>
+            ) : null}
             <input type="submit" value="로그인" />
             <Link to="/join">회원가입</Link>
           </form>

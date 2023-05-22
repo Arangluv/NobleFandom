@@ -11,15 +11,17 @@ const Wrapper = styled.div`
   height: auto;
   background-color: black;
   display: flex;
+  justify-content: flex-end;
 `;
 const FunctionList = styled.ul`
   width: 15%;
-  min-height: 100%;
-  height: auto;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  position: fixed;
+  left: 0;
   a {
     text-decoration: none;
   }
@@ -175,35 +177,39 @@ function AdminMain() {
   }, [tokenCount]);
   return loading ? null : (
     <>
-      <Wrapper>
-        <FunctionList>
-          <Link to={"register-list"}>
-            <li>크리에이터 신청서 보기</li>
-          </Link>
-          <Link to={"register-list"}>
-            <li>크리에이터 신청서 보기</li>
-          </Link>
-          <Link to={"register-list"}>
-            <li>크리에이터 신청서 보기</li>
-          </Link>
-          <Link to={"register-list"}>
-            <li>크리에이터 신청서 보기</li>
-          </Link>
-          <Link to={"register-list"}>
-            <li>크리에이터 신청서 보기</li>
-          </Link>
-          <Link to={"register-list"}>
-            <li>크리에이터 신청서 보기</li>
-          </Link>
-          <Link to={"register-list"}>
-            <li>크리에이터 신청서 보기</li>
-          </Link>
-        </FunctionList>
-        <SubWrapper>
-          <Outlet />
-        </SubWrapper>
-      </Wrapper>
-      {overlayView ? (
+      {!overlayView ? (
+        <Wrapper>
+          <FunctionList>
+            <Link to={""}>
+              <li>관리자 메인화면으로</li>
+            </Link>
+            <Link to={"register-list"}>
+              <li>크리에이터 신청서 보기</li>
+            </Link>
+            <Link to={"register-list"}>
+              <li>크리에이터 신청서 보기</li>
+            </Link>
+            <Link to={"register-list"}>
+              <li>크리에이터 신청서 보기</li>
+            </Link>
+            <Link to={"register-list"}>
+              <li>크리에이터 신청서 보기</li>
+            </Link>
+            <Link to={"register-list"}>
+              <li>크리에이터 신청서 보기</li>
+            </Link>
+            <Link to={"register-list"}>
+              <li>크리에이터 신청서 보기</li>
+            </Link>
+            <Link to={"register-list"}>
+              <li>크리에이터 신청서 보기</li>
+            </Link>
+          </FunctionList>
+          <SubWrapper>
+            <Outlet />
+          </SubWrapper>
+        </Wrapper>
+      ) : (
         <Overlay>
           <OverlayBox>
             <form action="post" onSubmit={handleSubmit(onValid)}>
@@ -227,7 +233,7 @@ function AdminMain() {
             </form>
           </OverlayBox>
         </Overlay>
-      ) : null}
+      )}
     </>
   );
 }

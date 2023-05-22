@@ -22,10 +22,10 @@ const userSchema = new mongoose.Schema({
   }, // ok
   follower: [{ type: mongoose.Schema.Types.ObjectId }], // ok
   likedFeed: [{ type: mongoose.Schema.Types.ObjectId, ref: "Feed" }], // ok
-  alarms: [{ type: mongoose.Schema.Types.ObjectId, ref: "Alarm" }], // ok
+  alarms: { type: mongoose.Schema.Types.ObjectId, ref: "Alarm" }, // ok
   request: [{ type: mongoose.Schema.Types.ObjectId, ref: "Request" }], // ok
   createdAt: { type: Date, default: Date.now },
-  nobleCoin: { type: mongoose.Schema.Types.ObjectId, ref: "Coin" },
+  nobleCoin: { type: mongoose.Schema.Types.ObjectId, ref: "NobleCoin" },
   chat: {
     chatting: {
       type: mongoose.Schema.Types.ObjectId,
@@ -34,6 +34,7 @@ const userSchema = new mongoose.Schema({
     },
     chatWith: [{ type: mongoose.Schema.Types.ObjectId }], // 메세지를 주고 받은 사람들
   }, //ok
+  createdAt: { type: Date, default: Date.now },
 });
 
 userSchema.pre("save", async function () {

@@ -2,7 +2,11 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import styled from "styled-components";
 import SideBar from "../../Components/SideBar";
-import { AiFillPlusCircle, AiOutlineCheck } from "react-icons/ai";
+import {
+  AiFillPlusCircle,
+  AiOutlineCheck,
+  AiFillMinusCircle,
+} from "react-icons/ai";
 import { TiDeleteOutline } from "react-icons/ti";
 import axios from "axios";
 import BASE_URL from "../../url";
@@ -170,6 +174,9 @@ const SubWrapper = styled.div`
           svg {
             color: rgba(85, 239, 196, 0.9);
             font-size: 2vw;
+          }
+          #minus_circle {
+            color: ${(props) => props.theme.textRedColor};
           }
         }
         button:hover {
@@ -364,18 +371,22 @@ interface IData {
   password: string;
   passwordConfirm: string;
   certification: boolean;
-  sns_account: string;
-  sns_id: string;
+  snsInfo: SnsProps[];
   terms: boolean;
   evidence_file: FileList;
   extraError?: string;
 }
+interface SnsProps {
+  sns_account: string;
+  sns_id: string;
+}
 function RegisterCreator() {
   const [loading, setLoading] = useState(false);
+  const [snsInfoKey, setSnsInfoKey] = useState<[] | string[]>([]);
   const [termsCheck, setTermsCheck] = useState(false);
   const [imagesFiles, setImagesFile] = useState<null | FileList | File[]>(null);
   const [imagesUrl, setImagesUrl] = useState<[] | string[]>([]);
-  const { register, formState, handleSubmit, setError, clearErrors } =
+  const { register, watch, formState, handleSubmit, setError, clearErrors } =
     useForm<IData>();
   useEffect(() => {
     const filesLength = imagesFiles?.length;
@@ -388,6 +399,7 @@ function RegisterCreator() {
         previews.push(URL.createObjectURL(imagesFiles[i]));
       }
       setImagesUrl([...previews]);
+      clearErrors("evidence_file");
     }
     return () => {
       for (let i = 0; i < imagesUrl.length; i++) {
@@ -423,14 +435,22 @@ function RegisterCreator() {
       setLoading(false);
       return;
     }
+    data.snsInfo.forEach((info, idx) => {
+      if (!info.sns_id) {
+        setError(`snsInfo.${idx}.sns_id`, {
+          message: "누락된 SNS id가 있습니다",
+        });
+        setLoading(false);
+        return;
+      }
+    });
     const formData = new FormData();
     const postData = {
       email: data.email,
       password: data.password,
       username: data.username,
       userId: uuid().split("-")[0],
-      sns_account: data.sns_account,
-      sns_id: data.sns_id,
+      snsInfo: data.snsInfo,
     };
     formData.append("data", JSON.stringify(postData));
     for (let i = 0; i < imagesFiles.length; i++) {
@@ -469,6 +489,35 @@ function RegisterCreator() {
       imagesUrl.filter((url) => url !== event.currentTarget.dataset.url)
     );
   };
+  useEffect(() => {
+    // sns Infomation handling part
+    if (snsInfoKey.length === 0) {
+      // 초기 랜러딩시 빈 배열이므로 uuid값을 하나 푸쉬한다
+      setSnsInfoKey([uuid().split("-")[0]]);
+    }
+  }, [snsInfoKey]);
+  const handlePlusClick = (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    event.preventDefault();
+    const newInfo = [...snsInfoKey, uuid().split("-")[0]];
+    setSnsInfoKey([...newInfo]);
+  };
+  const handleDeleteClick = (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    event.preventDefault();
+    const deleteTargetKey = event.currentTarget.dataset.key;
+    const targetKeyIndex = snsInfoKey.findIndex(
+      (key) => key === deleteTargetKey
+    );
+    const newSnsInfoKey = snsInfoKey.filter(
+      (value, idx) => idx !== targetKeyIndex
+    );
+    watch("snsInfo").splice(targetKeyIndex, 1);
+    setSnsInfoKey([...newSnsInfoKey]);
+  };
+  console.log(formState.errors);
   return (
     <>
       <Wrapper>
@@ -586,40 +635,53 @@ function RegisterCreator() {
               <label htmlFor="creator_sns">
                 <span>
                   사용중인 SNS 계정
-                  {formState.errors?.sns_account || formState.errors?.sns_id ? (
+                  {formState.errors?.snsInfo ? (
                     <small>
-                      {formState.errors?.sns_account?.message ||
-                        formState.errors?.sns_id?.message}
+                      {formState.errors?.snsInfo[0]?.sns_id?.message}
                     </small>
                   ) : null}
                 </span>
-                <div>
-                  <select
-                    {...register("sns_account", {
-                      required: "사용중인 sns계정을 골라주세요",
-                    })}
-                    id="seleted_sns"
-                  >
-                    <option value="insta">Instagram</option>
-                    <option value="facebook">Facebook</option>
-                    <option value="Twitter">Twitter</option>
-                    <option value="youtube">Youtube</option>
-                    <option value="tictok">Tictok</option>
-                    <option value="Twitch">Twitch</option>
-                    <option value="etc">기타</option>
-                  </select>
-                  <input
-                    {...register("sns_id", {
-                      required: "이용중인 sns계정 id를 입력해주세요",
-                    })}
-                    id="creator_sns"
-                    type="text"
-                    placeholder="ID"
-                  />
-                  <button>
-                    <AiFillPlusCircle />
-                  </button>
-                </div>
+                {snsInfoKey.map((keyValue, idx) => {
+                  return (
+                    <div key={keyValue}>
+                      <select
+                        {...register(`snsInfo.${idx}.sns_account`, {
+                          required: "사용중인 sns계정을 골라주세요",
+                        })}
+                        id="seleted_sns"
+                      >
+                        <option value="insta">Instagram</option>
+                        <option value="facebook">Facebook</option>
+                        <option value="Twitter">Twitter</option>
+                        <option value="youtube">Youtube</option>
+                        <option value="tictok">Tictok</option>
+                        <option value="Twitch">Twitch</option>
+                        <option value="etc">기타</option>
+                      </select>
+                      <input
+                        {...register(`snsInfo.${idx}.sns_id`, {
+                          required: "이용중인 sns계정 id를 입력해주세요",
+                        })}
+                        id="creator_sns"
+                        type="text"
+                        placeholder="ID"
+                      />
+                      {snsInfoKey.length === 1 ? (
+                        <button onClick={handlePlusClick}>
+                          <AiFillPlusCircle />
+                        </button>
+                      ) : snsInfoKey.length === idx + 1 ? (
+                        <button onClick={handlePlusClick}>
+                          <AiFillPlusCircle />
+                        </button>
+                      ) : (
+                        <button onClick={handleDeleteClick} data-key={keyValue}>
+                          <AiFillMinusCircle id="minus_circle" />
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
               </label>
               <label htmlFor="creator_evidence">
                 <div>

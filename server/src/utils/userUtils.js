@@ -3,6 +3,7 @@ import NobleCoin from "../models/NobleCoin.js";
 import { jwtConfig } from "../configs/jwtConfig.js";
 import { cookiesConfig } from "../configs/cookiesConfig.js";
 import jwt from "jsonwebtoken";
+import Alarm from "../models/Alarm.js";
 const tokenIssuance = (_id) => {
   const { secretKey, options } = jwtConfig;
   const payload = {
@@ -38,6 +39,8 @@ export const createUser = async (email, username, password, userId) => {
         email,
         password,
         userId,
+        isNewAlarm: true,
+        isNewMessage: true,
       });
     }
     const { _id } = user;
@@ -45,6 +48,22 @@ export const createUser = async (email, username, password, userId) => {
       coinOwner: _id,
     });
     user.nobleCoin = nobleCoin;
+    const alarms = await Alarm.create({
+      owner: _id,
+      alrams: [],
+    });
+    const data = {
+      sender: {
+        userId: "noblefandom_official",
+        userProfileImg:
+          "https://cdn.icon-icons.com/icons2/37/PNG/512/administrator_3552.png",
+      },
+      content: "가입을 환영합니다",
+      createdAt: Date.now(),
+    };
+    alarms.alarms.push(data);
+    alarms.save();
+    user.alarms = alarms;
     await user.save();
     const { token, tokenConfig } = tokenIssuance(_id);
     return { token, tokenConfig, _id };

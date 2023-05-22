@@ -1,8 +1,7 @@
-import { jwtConfig } from "../configs/jwtConfig.js";
+import { jwtConfig } from "../../configs/jwtConfig.js";
 import jwt from "jsonwebtoken";
-import User from "../models/User.js";
-import ApplicationForm from "../models/ApplicationForm.js";
-import InValidUserLog from "../models/InvalidUserLog.js";
+import User from "../../models/User.js";
+import InValidUserLog from "../../models/InvalidUserLog.js";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -17,6 +16,8 @@ export const adminInspect = async (req, res) => {
     const userInformation = jwt.verify(token, secretKey);
     const { id } = userInformation;
     const user = await User.findById(id);
+    console.log(userInformation);
+    console.log(user);
     if (!user) {
       await InValidUserLog.create({
         accessLogToken: token,
@@ -69,13 +70,4 @@ export const inspectAccessToken = async (req, res) => {
   }
 };
 
-export const getRegister = async (req, res) => {
-  try {
-    const register = await ApplicationForm.find({});
-    return res.status(200).json({ register });
-  } catch (error) {
-    return res
-      .status(404)
-      .json({ message: "크리에이터 신청서를 찾는데 문제가 발생했습니다" });
-  }
-};
+

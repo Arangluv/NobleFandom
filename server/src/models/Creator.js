@@ -4,8 +4,8 @@ import bcrypt from "bcrypt";
 const creatorSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   username: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
   userType: { type: String, default: "creator" },
+  password: { type: String, required: true },
   socialOnly: { type: Boolean, default: false },
   userId: { type: String, require: true },
   profileImg: { type: String, default: null },
@@ -29,13 +29,13 @@ const creatorSchema = new mongoose.Schema({
   follower: [{ type: mongoose.Schema.Types.ObjectId }],
   following: [{ type: mongoose.Schema.Types.ObjectId }],
   blockUser: [{ type: mongoose.Schema.Types.ObjectId }],
+  likedFeed: [{ type: mongoose.Schema.Types.ObjectId, ref: "Feed" }],
+  alarms: [{ type: mongoose.Schema.Types.ObjectId, ref: "Alarm" }],
   vipUser: [{ type: mongoose.Schema.Types.ObjectId }],
   membershipPlan: [
     { type: mongoose.Schema.Types.ObjectId, ref: "MembershipPlan" },
   ],
   feed: [{ type: mongoose.Schema.Types.ObjectId, ref: "Feed" }],
-  likedFeed: [{ type: mongoose.Schema.Types.ObjectId, ref: "Feed" }],
-  alarms: [{ type: mongoose.Schema.Types.ObjectId, ref: "Alarm" }],
   request: { type: mongoose.Schema.Types.ObjectId, ref: "Request" },
   createdAt: { type: Date, default: Date.now },
   chat: {
