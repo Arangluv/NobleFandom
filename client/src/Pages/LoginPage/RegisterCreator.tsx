@@ -464,6 +464,7 @@ function RegisterCreator() {
           "Content-Type": "multipart/form-data",
         },
         data: formData,
+        withCredentials: true,
       });
       navigator("/", { replace: true });
       setLoading(false);

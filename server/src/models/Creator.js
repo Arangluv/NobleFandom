@@ -47,12 +47,6 @@ const creatorSchema = new mongoose.Schema({
     chatWith: [{ type: mongoose.Schema.Types.ObjectId }], // 메세지를 주고 받은 사람들
   },
 });
-
-creatorSchema.pre("save", async function () {
-  if (this.isModified("password")) {
-    this.password = await bcrypt.hash(this.password, 8);
-  }
-});
 const Creator = mongoose.model("Creator", creatorSchema);
 
 export default Creator;

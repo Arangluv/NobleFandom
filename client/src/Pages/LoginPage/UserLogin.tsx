@@ -2,12 +2,15 @@ import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { AiFillFacebook, AiFillGoogleSquare } from "react-icons/ai";
-import { SiKakaotalk } from "react-icons/si";
 import SideBar from "../../Components/SideBar";
 import GoogleLoginBnt from "./GoogleLoginBnt";
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import BASE_URL from "../../url";
+import { useState } from "react";
+import { HashLoader } from "react-spinners";
+import { useSetRecoilState } from "recoil";
+import { loginState } from "../../atoms/atoms";
 const Wrapper = styled.div`
   width: 100%;
   height: 100vh;
@@ -161,81 +164,121 @@ const SocialLoginBox = styled.div`
     margin-bottom: 1vw;
   }
 `;
+const Overlay = styled.div`
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  position: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.1);
+`;
+const OverlayBox = styled.div`
+  width: 300px;
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
 interface DataProps {
   email: string;
   password: string;
   extraError?: string;
 }
 function UserLogin() {
+  const [isLoading, setIsLoading] = useState(false);
+  const setLoginState = useSetRecoilState(loginState);
   const { register, watch, formState, setError, handleSubmit, clearErrors } =
     useForm<DataProps>();
   let googleOauthClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID || "";
-  console.log(formState.errors);
+
   const onValid = async (data: DataProps) => {
-    console.log("submit ");
+    setIsLoading(true);
     await axios
-      .post(`${BASE_URL}/login`, {
-        email: data.email,
-        password: data.password,
+      .post(
+        `${BASE_URL}/login`,
+        {
+          email: data.email,
+          password: data.password,
+        },
+        { withCredentials: true }
+      )
+      .then((result) => {
+        const { data } = result;
+        delete data.message;
+        console.log(data);
+        setLoginState({ ...data });
+        setIsLoading(false);
       })
-      .then((result) => console.log(result))
       .catch((error) => {
+        setIsLoading(false);
         setError("extraError", {
           message: error.response.data.message,
         });
       });
   };
   return (
-    <Wrapper>
-      <SideBar />
-      <SubWrapper>
-        <LoginToEmailBox>
-          <Link to="/">NOBLE FANDOM</Link>
-          <form onSubmit={handleSubmit(onValid)}>
-            <input
-              {...register("email", {
-                required: "이메일을 입력해주세요",
-                pattern: {
-                  value: /^[a-zA-Z0-9+-\_.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/,
-                  message: "이메일 형식이 아닙니다",
-                },
-              })}
-              onFocus={() => clearErrors("extraError")}
-              type="text"
-              placeholder="이메일"
-            />
-            <input
-              {...register("password", {
-                required: "비밀번호를 입력해주세요",
-              })}
-              onFocus={() => clearErrors("extraError")}
-              type="password"
-              placeholder="비밀번호"
-            />
-            {formState.errors ? (
-              <small>
-                {formState.errors?.email?.message ||
-                  formState.errors?.password?.message ||
-                  formState.errors?.extraError?.message}
-              </small>
-            ) : null}
-            <input type="submit" value="로그인" />
-            <Link to="/join">회원가입</Link>
-          </form>
-          <span>비밀번호를 잊으셨나요?</span>
-        </LoginToEmailBox>
-        <SocialLoginBox>
-          <span>SNS로 로그인하기 </span>
-          <GoogleOAuthProvider clientId={googleOauthClientId}>
-            <GoogleLoginBnt />
-          </GoogleOAuthProvider>
-          <button>
-            <AiFillFacebook />
-            <span>페이스북 로그인</span>
-          </button>
-        </SocialLoginBox>
-      </SubWrapper>
-    </Wrapper>
+    <>
+      <Wrapper>
+        <SideBar />
+        <SubWrapper>
+          <LoginToEmailBox>
+            <Link to="/">NOBLE FANDOM</Link>
+            <form onSubmit={handleSubmit(onValid)}>
+              <input
+                {...register("email", {
+                  required: "이메일을 입력해주세요",
+                  pattern: {
+                    value: /^[a-zA-Z0-9+-\_.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/,
+                    message: "이메일 형식이 아닙니다",
+                  },
+                })}
+                onFocus={() => clearErrors("extraError")}
+                type="text"
+                placeholder="이메일"
+              />
+              <input
+                {...register("password", {
+                  required: "비밀번호를 입력해주세요",
+                })}
+                onFocus={() => clearErrors("extraError")}
+                type="password"
+                placeholder="비밀번호"
+              />
+              {formState.errors ? (
+                <small>
+                  {formState.errors?.email?.message ||
+                    formState.errors?.password?.message ||
+                    formState.errors?.extraError?.message}
+                </small>
+              ) : null}
+              <input type="submit" value="로그인" />
+              <Link to="/join">회원가입</Link>
+            </form>
+            <span>비밀번호를 잊으셨나요?</span>
+          </LoginToEmailBox>
+          <SocialLoginBox>
+            <span>SNS로 로그인하기 </span>
+            <GoogleOAuthProvider clientId={googleOauthClientId}>
+              <GoogleLoginBnt />
+            </GoogleOAuthProvider>
+            <button>
+              <AiFillFacebook />
+              <span>페이스북 로그인</span>
+            </button>
+          </SocialLoginBox>
+        </SubWrapper>
+      </Wrapper>
+      {isLoading ? (
+        <Overlay>
+          <OverlayBox>
+            <HashLoader color="#f1c40f" loading={isLoading} />
+          </OverlayBox>
+        </Overlay>
+      ) : null}
+    </>
   );
 }
 

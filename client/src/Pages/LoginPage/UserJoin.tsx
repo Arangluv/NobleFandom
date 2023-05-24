@@ -256,7 +256,8 @@ function UserJoin() {
       setLoading(false);
       navigator("/main");
     } catch (error: any) {
-      setErrorMsg(error.response.data.message);
+      console.log(error);
+      setErrorMsg(error.response?.data?.message);
       setLoading(false);
     }
   };

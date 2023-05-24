@@ -2,10 +2,10 @@ import axios from "axios";
 import { jwtConfig } from "../configs/jwtConfig.js";
 import { cookiesConfig } from "../configs/cookiesConfig.js";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 import User from "../models/User.js";
-import NobleCoin from "../models/NobleCoin.js";
 import ApplicationForm from "../models/ApplicationForm.js";
-import { createUser } from "../utils/userUtils.js";
+import { createUser, tokenIssuance } from "../utils/userUtils.js";
 import Creator from "../models/Creator.js";
 export const googleLogin = async (req, res) => {
   const { access_token } = req.body;
@@ -34,28 +34,81 @@ export const userJoin = async (req, res) => {
       .status(200)
       .json({ message: "회원가입에 성공했습니다" });
   } catch (error) {
-    return res
-      .status(404)
-      .json({ message: "사용자의 회원가입을 처리하는데 문제가 발생했습니다" });
+    return res.status(404).json({ message: error.message });
   }
 };
 export const userLogin = async (req, res) => {
-  console.log(req.body);
-  const {email, password} = req.body;
-  const userExist = await User.exists({email});
-  const creatorExist = await Creator.exists({email});
+  const { email, password } = req.body;
+  try {
+    const userExist = await User.exists({ email });
+    const creatorExist = await Creator.exists({ email });
 
-  if (!userExist && !creatorExist) {
-    return res.status(404).json({message : "유저가 존재하지 않습니다"})
+    if (!userExist && !creatorExist) {
+      return res.status(404).json({ message: "유저가 존재하지 않습니다" });
+    }
+    if (userExist) {
+      const user = await User.findOne({ email });
+      if (!user) {
+        return res
+          .status(404)
+          .json({ message: "유저를 찾는데 오류가 발생했습니다" });
+      }
+      const passwordMatch = await bcrypt.compare(password, user.password);
+      if (!passwordMatch) {
+        return res
+          .status(404)
+          .json({ message: "이메일 혹은 비밀번호가 일치하지 않습니다" });
+      }
+      const { _id } = user;
+      const { token, tokenConfig } = tokenIssuance(_id);
+      return res
+        .cookie("token", token, {
+          ...tokenConfig,
+        })
+        .status(200)
+        .json({
+          message: "로그인에 성공했습니다",
+          username: user.username,
+          userId: user.userId,
+          userType: user.userType,
+          profileImg: user.profileImg,
+          backGroundImg: user.backGroundImg,
+        });
+    }
+    if (creatorExist) {
+      const creator = await Creator.findOne({ email });
+      if (!creator) {
+        return res
+          .status(404)
+          .json({ message: "유저를 찾는데 오류가 발생했습니다" });
+      }
+      const passwordMatch = await bcrypt.compare(password, creator.password);
+      if (!passwordMatch) {
+        return res
+          .status(404)
+          .json({ message: "이메일 혹은 비밀번호가 일치하지 않습니다." });
+      }
+      const { _id } = creator;
+      const { token, tokenConfig } = tokenIssuance(_id);
+      return res
+        .cookie("token", token, {
+          ...tokenConfig,
+        })
+        .status(200)
+        .json({
+          message: "로그인에 성공했습니다",
+          username: creator.username,
+          userId: creator.userId,
+          userType: creator.userType,
+          profileImg: creator.profileImg,
+          backGroundImg: creator.backGroundImg,
+        });
+    }
+  } catch (error) {
+    return res
+      .status(404)
+      .json({ message: "로그인하는데 문제가 발생했습니다" });
   }
-  if (userExist) {
-    const user = await User.findOne({email});
-    
-  }
-  if (creatorExist) {
-
-  }
-  return res.status(404).json({message : "로그인하는데 문제가 발생했습니다"})
 };
 export const creatorRegister = async (req, res) => {
   const data = JSON.parse(req.body.data);
@@ -91,13 +144,9 @@ export const creatorRegister = async (req, res) => {
         evidenceUrl: evidence_files.map((file) => file.location),
       });
       return res
-        .cookie(
-          "token",
-          { token },
-          {
-            ...tokenConfig,
-          }
-        )
+        .cookie("token", token, {
+          ...tokenConfig,
+        })
         .status(200)
         .json({ message: "크리에이터 신청서가 잘 접수됐습니다." });
     }
@@ -112,6 +161,7 @@ export const creatorRegister = async (req, res) => {
     };
     const token = jwt.sign(payload, secretKey, options);
     const tokenConfig = cookiesConfig();
+    console.log(tokenConfig);
     await ApplicationForm.create({
       owner: user._id,
       snsInfo: [
@@ -125,18 +175,45 @@ export const creatorRegister = async (req, res) => {
       evidenceUrl: evidence_files.map((file) => file.location),
     });
     return res
-      .cookie(
-        "token",
-        { token },
-        {
-          ...tokenConfig,
-        }
-      )
+      .cookie("token", token, {
+        ...tokenConfig,
+      })
       .status(200)
       .json({ message: "크리에이터 신청서가 잘 접수됐습니다." });
   } catch (error) {
     return res.status(404).json({
       message: error.message,
     });
+  }
+};
+export const tokenInspect = async (req, res) => {
+  try {
+    const { token } = req.cookies;
+    const { secretKey } = jwtConfig;
+    const data = jwt.verify(token, secretKey);
+    const { id } = data;
+    const user = await User.findById(id);
+    if (user) {
+      const { userType, username, userId, profileImg, backGroundImg } = user;
+      return res
+        .status(200)
+        .json({ userType, username, userId, profileImg, backGroundImg });
+    }
+    const creator = await Creator.findById(id);
+    if (creator) {
+      const { userType, username, userId, profileImg, backGroundImg } = creator;
+      return res
+        .status(200)
+        .json({ userType, username, userId, profileImg, backGroundImg });
+    }
+    return res.status(404).json({
+      message: "토큰이 만료 또는 유효하지 않은 토큰이거나, 유저가 없습니다",
+    });
+  } catch (error) {
+    console.log("Error");
+    console.log(error);
+    return res
+      .status(404)
+      .json({ message: "토큰 검사 중 오류가 발생했습니다." });
   }
 };

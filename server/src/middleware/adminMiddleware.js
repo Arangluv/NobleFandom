@@ -4,7 +4,7 @@ import User from "../models/User.js";
 
 export const inspectAdmin = async (req, res, next) => {
   try {
-    const { token } = req.cookies.token;
+    const { token } = req.cookies;
     const { secretKey } = jwtConfig;
     const userInformation = jwt.verify(token, secretKey);
     const { id } = userInformation;

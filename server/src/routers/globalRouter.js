@@ -4,6 +4,7 @@ import {
   userJoin,
   userLogin,
   creatorRegister,
+  tokenInspect,
 } from "../controllers/globalController.js";
 import aws from "aws-sdk";
 import multer from "multer";
@@ -36,4 +37,5 @@ globalRouter
   .route("/creator-register")
   .post(imageUploader.array("evidence_file"), creatorRegister);
 globalRouter.route("/login").post(userLogin);
+globalRouter.route("/token-inspect").get(tokenInspect);
 export default globalRouter;

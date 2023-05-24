@@ -1,0 +1,310 @@
+2023-05-23 13:59:45 info: GET 304 /token-inspect 75.336 ms
+
+2023-05-23 13:59:46 info: GET 304 /token-inspect 9.677 ms
+
+2023-05-23 14:07:30 info: GET 304 /token-inspect 31.149 ms
+
+2023-05-23 14:07:32 info: GET 304 /token-inspect 8.650 ms
+
+2023-05-23 14:07:41 info: GET 304 /token-inspect 11.875 ms
+
+2023-05-23 14:07:45 info: OPTIONS 204 /login 0.410 ms
+
+2023-05-23 14:07:46 info: POST 200 /login 46.525 ms
+
+2023-05-23 14:07:57 info: GET 304 /token-inspect 5.557 ms
+
+2023-05-23 14:07:57 info: OPTIONS 204 /login 0.415 ms
+
+2023-05-23 14:07:58 info: POST 200 /login 59.076 ms
+
+2023-05-23 14:08:00 info: GET 304 /token-inspect 9.363 ms
+
+2023-05-23 14:08:01 info: POST 200 /login 12.819 ms
+
+2023-05-23 14:09:11 info: GET 304 /token-inspect 62.163 ms
+
+2023-05-23 14:09:13 info: GET 304 /token-inspect 6.509 ms
+
+2023-05-23 14:09:13 info: OPTIONS 204 /login 0.815 ms
+
+2023-05-23 14:09:13 info: POST 200 /login 28.540 ms
+
+2023-05-23 14:09:22 info: GET 304 /token-inspect 12.646 ms
+
+2023-05-23 14:09:57 info: GET 304 /token-inspect 15.754 ms
+
+2023-05-23 14:09:57 info: GET 304 /token-inspect 47.675 ms
+
+2023-05-23 14:09:58 info: OPTIONS 204 /login 0.159 ms
+
+2023-05-23 14:09:58 info: POST 200 /login 37.892 ms
+
+2023-05-23 14:11:37 info: GET 304 /token-inspect 53.265 ms
+
+2023-05-23 14:11:37 info: GET 304 /token-inspect 11.314 ms
+
+2023-05-23 14:11:47 info: GET 304 /token-inspect 17.200 ms
+
+2023-05-23 14:11:47 info: GET 304 /token-inspect 5.750 ms
+
+2023-05-23 14:11:50 info: OPTIONS 204 /login 0.369 ms
+
+2023-05-23 14:11:50 info: POST 404 /login 65.609 ms
+
+2023-05-23 14:12:28 info: GET 304 /token-inspect 20.024 ms
+
+2023-05-23 14:12:29 info: OPTIONS 204 /login 0.464 ms
+
+2023-05-23 14:12:29 info: POST 404 /login 42.272 ms
+
+2023-05-23 14:12:32 info: POST 404 /login 86.271 ms
+
+2023-05-23 14:12:44 info: GET 304 /token-inspect 10.018 ms
+
+2023-05-23 14:12:44 info: GET 304 /token-inspect 9.567 ms
+
+2023-05-23 14:16:15 info: GET 304 /token-inspect 5.526 ms
+
+2023-05-23 14:29:44 info: GET 304 /token-inspect 5.708 ms
+
+2023-05-23 14:30:48 info: GET 304 /token-inspect 5.955 ms
+
+2023-05-23 14:30:56 info: GET 304 /token-inspect 16.669 ms
+
+2023-05-23 14:30:59 info: GET 304 /token-inspect 63.741 ms
+
+2023-05-23 14:31:07 info: GET 304 /token-inspect 5.443 ms
+
+2023-05-23 14:31:16 info: GET 304 /token-inspect 14.072 ms
+
+2023-05-23 14:31:18 info: GET 304 /token-inspect 7.107 ms
+
+2023-05-23 14:31:26 info: GET 200 /token-inspect 12.310 ms
+
+2023-05-23 14:31:41 info: OPTIONS 204 /login 0.255 ms
+
+2023-05-23 14:31:41 info: POST 404 /login 23.953 ms
+
+2023-05-23 14:31:44 info: POST 200 /login 34.693 ms
+
+2023-05-23 14:31:45 info: POST 200 /login 24.322 ms
+
+2023-05-23 14:31:53 info: GET 304 /token-inspect 1.094 ms
+
+2023-05-23 14:31:53 info: GET 304 /token-inspect 1.803 ms
+
+2023-05-23 14:32:49 info: GET 304 /token-inspect 8.815 ms
+
+2023-05-23 14:33:38 info: GET 304 /token-inspect 8.867 ms
+
+2023-05-23 14:33:57 info: GET 304 /token-inspect 3.625 ms
+
+2023-05-23 14:34:02 info: GET 304 /token-inspect 1.869 ms
+
+2023-05-23 14:34:29 info: OPTIONS 204 /login 1.515 ms
+
+2023-05-23 14:34:29 info: POST 200 /login 63.275 ms
+
+2023-05-23 14:36:57 info: POST 404 /creator-register 6354.722 ms
+
+2023-05-23 14:37:07 info: POST 200 /creator-register 1231.634 ms
+
+2023-05-23 14:37:20 info: GET 404 /admin/admin-validation 0.708 ms
+
+2023-05-23 14:38:31 info: OPTIONS 204 /login 0.348 ms
+
+2023-05-23 14:38:31 info: POST 404 /login 36.928 ms
+
+2023-05-23 14:38:53 info: OPTIONS 204 /login 0.202 ms
+
+2023-05-23 14:38:53 info: POST 200 /login 34.056 ms
+
+2023-05-23 14:39:53 info: OPTIONS 204 /login 1.417 ms
+
+2023-05-23 14:39:53 info: POST 200 /login 87.404 ms
+
+2023-05-23 14:40:30 info: OPTIONS 204 /login 1.434 ms
+
+2023-05-23 14:40:31 info: POST 200 /login 56.019 ms
+
+2023-05-23 14:41:16 info: OPTIONS 204 /login 1.640 ms
+
+2023-05-23 14:41:16 info: POST 200 /login 81.449 ms
+
+2023-05-23 14:41:18 info: POST 200 /login 25.161 ms
+
+2023-05-23 14:41:46 info: OPTIONS 204 /login 0.193 ms
+
+2023-05-23 14:41:46 info: POST 200 /login 35.292 ms
+
+2023-05-23 14:41:47 info: POST 200 /login 25.753 ms
+
+2023-05-23 14:41:47 info: POST 200 /login 29.150 ms
+
+2023-05-23 14:41:48 info: POST 200 /login 41.765 ms
+
+2023-05-23 14:42:02 info: OPTIONS 204 /login 0.169 ms
+
+2023-05-23 14:42:02 info: POST 200 /login 25.903 ms
+
+2023-05-23 14:42:54 info: OPTIONS 204 /login 1.412 ms
+
+2023-05-23 14:43:59 info: OPTIONS 204 /login 1.593 ms
+
+2023-05-23 14:44:40 info: OPTIONS 204 /login 1.946 ms
+
+2023-05-23 14:44:40 info: POST 200 /login 63.370 ms
+
+2023-05-23 14:46:06 info: OPTIONS 204 /login 1.486 ms
+
+2023-05-23 14:46:06 info: POST 200 /login 87.195 ms
+
+2023-05-23 14:46:07 info: POST 200 /login 26.832 ms
+
+2023-05-23 14:48:38 info: OPTIONS 204 /login 1.525 ms
+
+2023-05-23 14:48:38 info: POST 200 /login 63.156 ms
+
+2023-05-23 14:52:40 info: OPTIONS 204 /login 0.657 ms
+
+2023-05-23 14:52:40 info: POST 200 /login 111.254 ms
+
+2023-05-23 14:53:18 info: OPTIONS 204 /login 1.430 ms
+
+2023-05-23 14:53:18 info: POST 200 /login 94.703 ms
+
+2023-05-23 15:08:54 info: OPTIONS 204 /login 1.468 ms
+
+2023-05-23 15:08:54 info: POST 200 /login 132.829 ms
+
+2023-05-23 15:09:04 info: OPTIONS 204 /login 0.173 ms
+
+2023-05-23 15:09:04 info: POST 404 /login 151.060 ms
+
+2023-05-23 15:09:07 info: POST 404 /login 24.914 ms
+
+2023-05-23 15:13:55 info: OPTIONS 204 /join 9.160 ms
+
+2023-05-23 15:13:55 info: POST 200 /join 163.154 ms
+
+2023-05-23 15:14:27 info: POST 200 /creator-register 786.194 ms
+
+2023-05-23 15:14:30 info: GET 404 /admin/admin-validation 1.482 ms
+
+2023-05-23 15:16:33 info: GET 404 /admin/admin-validation 9.745 ms
+
+2023-05-23 15:17:18 info: GET 404 /admin/admin-validation 8.259 ms
+
+2023-05-23 15:17:27 info: GET 404 /admin/admin-validation 17.963 ms
+
+2023-05-23 15:17:38 info: GET 404 /admin/admin-validation 2.058 ms
+
+2023-05-23 15:19:02 info: OPTIONS 204 /login 1.818 ms
+
+2023-05-23 15:19:02 info: POST 200 /login 58.005 ms
+
+2023-05-23 15:19:16 info: GET 200 /admin/admin-validation 97.092 ms
+
+2023-05-23 15:19:19 info: OPTIONS 204 /admin/access_token 0.195 ms
+
+2023-05-23 15:19:19 info: POST 200 /admin/access_token 2.876 ms
+
+2023-05-23 15:21:22 info: OPTIONS 204 /login 1.699 ms
+
+2023-05-23 15:21:22 info: POST 404 /login 20.001 ms
+
+2023-05-23 15:28:29 info: GET 304 /admin/admin-validation 47.860 ms
+
+2023-05-23 15:28:30 info: OPTIONS 204 /admin/access_token 0.710 ms
+
+2023-05-23 15:28:30 info: POST 200 /admin/access_token 29.969 ms
+
+2023-05-23 15:28:33 info: GET 404 /admin/creator-register 3.200 ms
+
+2023-05-23 15:28:34 info: GET 404 /admin/creator-register 2.512 ms
+
+2023-05-23 15:28:36 info: GET 404 /admin/creator-register 1.405 ms
+
+2023-05-23 15:30:05 info: GET 304 /admin/admin-validation 36.037 ms
+
+2023-05-23 15:30:07 info: OPTIONS 204 /admin/access_token 0.531 ms
+
+2023-05-23 15:30:07 info: POST 200 /admin/access_token 10.252 ms
+
+2023-05-23 15:30:08 info: GET 200 /admin/creator-register 12.526 ms
+
+2023-05-23 15:30:12 info: OPTIONS 204 /admin/approve 0.310 ms
+
+2023-05-23 15:30:12 info: POST 200 /admin/approve 198.456 ms
+
+2023-05-23 15:30:15 info: GET 304 /admin/admin-validation 9.121 ms
+
+2023-05-23 15:30:18 info: OPTIONS 204 /admin/access_token 0.296 ms
+
+2023-05-23 15:30:18 info: POST 200 /admin/access_token 0.773 ms
+
+2023-05-23 15:30:18 info: GET 200 /admin/creator-register 5.542 ms
+
+2023-05-23 15:30:21 info: GET 304 /admin/creator-register 8.810 ms
+
+2023-05-23 15:30:23 info: GET 304 /admin/creator-register 12.954 ms
+
+2023-05-23 15:30:24 info: GET 304 /admin/creator-register 46.008 ms
+
+2023-05-23 15:30:24 info: GET 304 /admin/creator-register 18.215 ms
+
+2023-05-23 15:30:30 info: GET - /admin/creator-register - ms
+
+2023-05-23 15:30:38 info: OPTIONS 204 /login 0.164 ms
+
+2023-05-23 15:30:38 info: POST 200 /login 31.494 ms
+
+2023-05-23 15:30:55 info: GET 404 /admin/admin-validation 80.747 ms
+
+2023-05-23 15:37:12 info: OPTIONS 204 /login 0.507 ms
+
+2023-05-23 15:37:12 info: POST 200 /login 32.640 ms
+
+2023-05-23 15:39:28 info: OPTIONS 204 /login 1.446 ms
+
+2023-05-23 15:39:28 info: POST 200 /login 93.365 ms
+
+2023-05-23 15:40:46 info: OPTIONS 204 /login 0.215 ms
+
+2023-05-23 15:40:46 info: POST 200 /login 28.163 ms
+
+2023-05-23 15:42:08 info: OPTIONS 204 /login 0.211 ms
+
+2023-05-23 15:42:08 info: POST 200 /login 59.391 ms
+
+2023-05-23 15:42:30 info: OPTIONS 204 /login 0.272 ms
+
+2023-05-23 15:42:30 info: POST 200 /login 34.038 ms
+
+2023-05-23 15:45:30 info: GET 304 /token-inspect 9.373 ms
+
+2023-05-23 15:50:08 info: GET 200 /token-inspect 136.771 ms
+
+2023-05-23 15:50:11 info: GET 304 /token-inspect 36.282 ms
+
+2023-05-23 15:50:16 info: GET 304 /token-inspect 43.729 ms
+
+2023-05-23 15:50:45 info: GET 304 /token-inspect 42.840 ms
+
+2023-05-23 15:50:47 info: GET 304 /token-inspect 25.094 ms
+
+2023-05-23 15:50:53 info: GET 304 /token-inspect 13.291 ms
+
+2023-05-23 15:51:01 info: GET 404 /token-inspect 4.757 ms
+
+2023-05-23 15:51:06 info: GET 404 /token-inspect 1.004 ms
+
+2023-05-23 15:51:07 info: GET 404 /token-inspect 1.215 ms
+
+2023-05-23 15:51:09 info: GET 404 /token-inspect 1.741 ms
+
+2023-05-23 15:51:13 info: GET 404 /token-inspect 1.252 ms
+
+2023-05-23 18:03:21 info: GET 404 /token-inspect 3.868 ms
+

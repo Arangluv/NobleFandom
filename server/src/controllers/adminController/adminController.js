@@ -6,18 +6,17 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export const adminInspect = async (req, res) => {
-  if (Object.keys(req.cookies).length === 0) {
+  console.log(req.cookies);
+  const { token } = req?.cookies;
+  if (!token) {
     // 쿠키가 비었을 경우
     return res.status(404).json({ message: "로그인 후 이용해주세요" });
   }
   try {
-    const { token } = req.cookies.token;
     const { secretKey } = jwtConfig;
     const userInformation = jwt.verify(token, secretKey);
     const { id } = userInformation;
     const user = await User.findById(id);
-    console.log(userInformation);
-    console.log(user);
     if (!user) {
       await InValidUserLog.create({
         accessLogToken: token,
@@ -55,7 +54,7 @@ export const inspectAccessToken = async (req, res) => {
   const { access_token } = req.body;
   try {
     if (access_token !== process.env.ACCESS_TOKEN_TO_ADMIN_PAGE) {
-      const { token } = req.cookies.token;
+      const { token } = req.cookies;
       await InValidUserLog.create({
         accessLogToken: token,
         message: "토큰 입력 실패",
@@ -69,5 +68,3 @@ export const inspectAccessToken = async (req, res) => {
       .json({ message: "토큰 검사시 문제가 발생했습니다." });
   }
 };
-
-

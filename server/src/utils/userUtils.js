@@ -4,7 +4,7 @@ import { jwtConfig } from "../configs/jwtConfig.js";
 import { cookiesConfig } from "../configs/cookiesConfig.js";
 import jwt from "jsonwebtoken";
 import Alarm from "../models/Alarm.js";
-const tokenIssuance = (_id) => {
+export const tokenIssuance = (_id) => {
   const { secretKey, options } = jwtConfig;
   const payload = {
     id: _id.toString(),
