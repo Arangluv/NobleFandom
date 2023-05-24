@@ -7,11 +7,116 @@ import User from "../models/User.js";
 import ApplicationForm from "../models/ApplicationForm.js";
 import { createUser, tokenIssuance } from "../utils/userUtils.js";
 import Creator from "../models/Creator.js";
+import NobleCoin from "../models/NobleCoin.js";
+import Alarm from "../models/Alarm.js";
 export const googleLogin = async (req, res) => {
-  const { access_token } = req.body;
-  const { data } = await axios.get(
-    `https://www.googleapis.com/oauth2/v1/userinfo?access_token=${access_token}`
-  );
+  const { access_token, userId, username } = req.body;
+  try {
+    if (!access_token) {
+      throw new Error("구글 로그인을 처리하는데 문제가 발생했습니다");
+    }
+    const { data } = await axios.get(
+      `https://www.googleapis.com/oauth2/v1/userinfo?access_token=${access_token}`
+    );
+    // 유저가 있는지 검사, 없으면 계정을 만들고 로그인 시킨다
+    const user = await User.findOne({
+      socialOnly: true,
+      email: data.email,
+    });
+    const creator = await Creator.findOne({
+      socialOnly: true,
+      email: data.email,
+    });
+    // 유저가 없는 경우 (일반유저 + 크리에이터)
+    if (!user && !creator) {
+      const user = await User.create({
+        email: data.email,
+        socialOnly: true,
+        username: `fan_${username}`,
+        userId: userId,
+        isNewAlarm: true,
+        isNewMessage: true,
+      });
+      const { _id } = user;
+      const nobleCoin = await NobleCoin.create({
+        coinOwner: _id,
+      });
+      user.nobleCoin = nobleCoin;
+      const alarms = await Alarm.create({
+        owner: _id,
+        alrams: [],
+      });
+      const newAlarm = {
+        sender: {
+          userId: "noblefandom_official",
+          userProfileImg:
+            "https://cdn.icon-icons.com/icons2/37/PNG/512/administrator_3552.png",
+        },
+        content: "가입을 환영합니다",
+        createdAt: Date.now(),
+      };
+      alarms.alarms.push(newAlarm);
+      alarms.save();
+      user.alarms = alarms;
+      await user.save();
+      const { secretKey, options } = jwtConfig;
+      const payload = {
+        id: _id.toString(),
+      };
+      const token = jwt.sign(payload, secretKey, options);
+      const tokenConfig = cookiesConfig();
+      return res
+        .cookie("token", token, { ...tokenConfig })
+        .status(200)
+        .json({
+          username: user.username,
+          userType: "user",
+          userId: user.userId,
+          backGroundImg: null,
+          profileImg: null,
+        });
+    }
+    // 일반유저 유저인
+    if (user && !creator) {
+      const { secretKey, options } = jwtConfig;
+      const payload = {
+        id: user._id.toString(),
+      };
+      const token = jwt.sign(payload, secretKey, options);
+      const tokenConfig = cookiesConfig();
+      return res
+        .cookie("token", token, { ...tokenConfig })
+        .status(200)
+        .json({
+          username: user.username,
+          userType: user.userType,
+          userId: user.userId,
+          backGroundImg: user.backGroundImg,
+          profileImg: user.profileImg,
+        });
+    }
+    if (creator && !user) {
+      const { secretKey, options } = jwtConfig;
+      const payload = {
+        id: creator._id.toString(),
+      };
+      const token = jwt.sign(payload, secretKey, options);
+      const tokenConfig = cookiesConfig();
+      return res
+        .cookie("token", token, { ...tokenConfig })
+        .status(200)
+        .json({
+          username: creator.username,
+          userType: creator.userType,
+          userId: creator.userId,
+          backGroundImg: creator.backGroundImg,
+          profileImg: creator.profileImg,
+        });
+    }
+    return res.status(404).json({ message: "구글로그인에 실패했습니다" });
+  } catch (error) {
+    return res.status(404).json({ message: error.message });
+  }
 };
 
 export const userJoin = async (req, res) => {
@@ -40,8 +145,8 @@ export const userJoin = async (req, res) => {
 export const userLogin = async (req, res) => {
   const { email, password } = req.body;
   try {
-    const userExist = await User.exists({ email });
-    const creatorExist = await Creator.exists({ email });
+    const userExist = await User.exists({ email, socialOnly: false });
+    const creatorExist = await Creator.exists({ email, socialOnly: false });
 
     if (!userExist && !creatorExist) {
       return res.status(404).json({ message: "유저가 존재하지 않습니다" });
@@ -189,6 +294,9 @@ export const creatorRegister = async (req, res) => {
 export const tokenInspect = async (req, res) => {
   try {
     const { token } = req.cookies;
+    if (!token) {
+      return res.status(204).send();
+    }
     const { secretKey } = jwtConfig;
     const data = jwt.verify(token, secretKey);
     const { id } = data;
@@ -206,11 +314,11 @@ export const tokenInspect = async (req, res) => {
         .status(200)
         .json({ userType, username, userId, profileImg, backGroundImg });
     }
-    return res.status(404).json({
+    return res.status(204).json({
       message: "토큰이 만료 또는 유효하지 않은 토큰이거나, 유저가 없습니다",
     });
   } catch (error) {
-    console.log("Error");
+    console.log("Error : globalController, tokenInspect");
     console.log(error);
     return res
       .status(404)

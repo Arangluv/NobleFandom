@@ -262,7 +262,7 @@ function UserLogin() {
           <SocialLoginBox>
             <span>SNS로 로그인하기 </span>
             <GoogleOAuthProvider clientId={googleOauthClientId}>
-              <GoogleLoginBnt />
+              <GoogleLoginBnt setError={setError} setIsLoading={setIsLoading} />
             </GoogleOAuthProvider>
             <button>
               <AiFillFacebook />

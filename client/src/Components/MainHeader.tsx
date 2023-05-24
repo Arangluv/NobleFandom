@@ -1,12 +1,10 @@
-import {
-  motion,
-  useMotionValueEvent,
-  useScroll,
-  useTransform,
-} from "framer-motion";
-import { useState } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { Link } from "react-router-dom";
+import { useRecoilValue } from "recoil";
 import styled from "styled-components";
+import { loginState } from "../atoms/atoms";
+import { useState } from "react";
+import axios from "axios";
 const Header = styled(motion.header)`
   position: fixed;
   width: 100%;
@@ -32,7 +30,21 @@ const Header = styled(motion.header)`
   & > .login_link {
     display: flex;
     justify-content: flex-end;
+    align-items: center;
     padding-right: 2vw;
+    span {
+      font-size: 1.4vw;
+      color: white;
+      text-shadow: ${(props) => props.theme.textShadow};
+      display: flex;
+      margin-left: 2vw;
+      align-items: center;
+      transition: all 0.1s ease-in-out;
+      &:hover {
+        color: ${(props) => props.theme.accentColor};
+        cursor: pointer;
+      }
+    }
   }
   div:nth-child(1) > h1 > a {
     font-weight: 700;
@@ -45,6 +57,11 @@ const Header = styled(motion.header)`
     a {
       color: ${(props) => props.theme.bgColor};
       text-shadow: ${(props) => props.theme.textShadow};
+      transition: all 0.1s ease-in-out;
+      font-size: 1.4vw;
+    }
+    a:hover {
+      color: ${(props) => props.theme.accentColor};
     }
     li {
       margin: 0 0.5vw;
@@ -52,10 +69,13 @@ const Header = styled(motion.header)`
   }
   & > .login_link > a {
     display: flex;
-    width: 100%;
-    justify-content: flex-end;
     color: ${(props) => props.theme.bgColor};
     text-shadow: ${(props) => props.theme.textShadow};
+    transition: all 0.1s ease-in-out;
+    font-size: 1.4vw;
+    &:hover {
+      color: ${(props) => props.theme.accentColor};
+    }
   }
 `;
 const hdVarients = {
@@ -76,12 +96,17 @@ const hdVarients = {
 };
 function MainHeader() {
   // 유저의 위치가 Login이면 ul을 비워준다.
+  const [loading, setLoading] = useState(false);
   const { scrollYProgress } = useScroll({ offset: ["150vh", "155vh"] });
   const backgroundColor = useTransform(
     scrollYProgress,
     [0, 1],
     ["rgba(0,0,0,0)", "rgba(0,0,0,1)"]
   );
+  const userState = useRecoilValue(loginState);
+  // const handleLogout = async () => {
+  //   await axios.
+  // };
   return (
     <Header
       style={{ backgroundColor }}
@@ -114,7 +139,14 @@ function MainHeader() {
         </ul>
       </div>
       <div className="login_link">
-        <Link to="/withus">로그인</Link>
+        {userState.userType === "" ? (
+          <Link to="/withus">로그인</Link>
+        ) : (
+          <>
+            <Link to="/main">메인페이지</Link>
+            <span>로그아웃</span>
+          </>
+        )}
       </div>
     </Header>
   );

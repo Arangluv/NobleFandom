@@ -39,6 +39,11 @@
             "date": 1684818336065,
             "name": "logs/warn/2023-05-23.warn.log",
             "hash": "4fb46b6f16c36e7266a1ee3c11637e99d5c05b790d62708300332dec9ca2de61"
+        },
+        {
+            "date": 1684903499812,
+            "name": "logs/warn/2023-05-24.warn.log",
+            "hash": "21ef9cfd16ee8bf0c06307d6a3bbd96cad87ab5751dd779d1dad05ac75fb2b88"
         }
     ],
     "hashType": "sha256"

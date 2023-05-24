@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import { Outlet } from "react-router-dom";
+import { toast } from "react-toastify";
 import CreatorSideBar from "../../Components/CreatorSideBar";
 const Wrapper = styled.div`
   width: 100%;
