@@ -6,6 +6,7 @@ interface LoginProps {
   userId: string | undefined;
   userType: string | undefined;
   username: string | undefined;
+  email: string | undefined;
 }
 export const userFeedLayout = atom<
   null | "subscribe" | "feed" | "request" | "response"
@@ -22,5 +23,6 @@ export const loginState = atom<LoginProps>({
     userId: "",
     userType: "",
     username: "",
+    email: "",
   },
 });

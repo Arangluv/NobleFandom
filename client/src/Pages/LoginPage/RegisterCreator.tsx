@@ -13,7 +13,7 @@ import BASE_URL from "../../url";
 import uuid from "react-uuid";
 import { motion } from "framer-motion";
 import { HashLoader } from "react-spinners";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 const Wrapper = styled.div`
   height: 250vh;
   width: 100%;
@@ -386,8 +386,16 @@ function RegisterCreator() {
   const [termsCheck, setTermsCheck] = useState(false);
   const [imagesFiles, setImagesFile] = useState<null | FileList | File[]>(null);
   const [imagesUrl, setImagesUrl] = useState<[] | string[]>([]);
-  const { register, watch, formState, handleSubmit, setError, clearErrors } =
-    useForm<IData>();
+  const {
+    register,
+    watch,
+    setValue,
+    formState,
+    handleSubmit,
+    setError,
+    clearErrors,
+  } = useForm<IData>();
+  const location = useLocation();
   useEffect(() => {
     const filesLength = imagesFiles?.length;
     if (!imagesFiles) {
@@ -445,13 +453,25 @@ function RegisterCreator() {
       }
     });
     const formData = new FormData();
-    const postData = {
-      email: data.email,
-      password: data.password,
-      username: data.username,
-      userId: uuid().split("-")[0],
-      snsInfo: data.snsInfo,
-    };
+    let postData = null;
+    if (location.state === null) {
+      postData = {
+        email: data.email,
+        password: data.password,
+        username: data.username,
+        userId: uuid().split("-")[0],
+        snsInfo: data.snsInfo,
+      };
+    } else {
+      postData = {
+        email: data.email,
+        password: data.password,
+        username: data.username,
+        userId: location.state.userId,
+        snsInfo: data.snsInfo,
+      };
+    }
+
     formData.append("data", JSON.stringify(postData));
     for (let i = 0; i < imagesFiles.length; i++) {
       formData.append("evidence_file", imagesFiles[i]);
@@ -518,7 +538,15 @@ function RegisterCreator() {
     watch("snsInfo").splice(targetKeyIndex, 1);
     setSnsInfoKey([...newSnsInfoKey]);
   };
-  console.log(formState.errors);
+  useEffect(() => {
+    if (location.state === null) {
+      return;
+    }
+    setValue("email", location.state.email);
+    setValue("username", location.state.username);
+    setValue("password", "********");
+    setValue("passwordConfirm", "********");
+  }, []);
   return (
     <>
       <Wrapper>
@@ -550,6 +578,7 @@ function RegisterCreator() {
                   id="creator_email"
                   type="text"
                   placeholder="이메일"
+                  disabled={location.state !== null}
                 />
               </label>
               <label htmlFor="creator_username">
@@ -571,6 +600,7 @@ function RegisterCreator() {
                   id="creator_username"
                   type="text"
                   placeholder="닉네임"
+                  disabled={location.state !== null}
                 />
               </label>
               <label htmlFor="creator_password">
@@ -591,6 +621,7 @@ function RegisterCreator() {
                   id="creator_password"
                   type="password"
                   placeholder="비밀번호"
+                  disabled={location.state !== null}
                 />
               </label>
               <label htmlFor="creator_password_verification">
@@ -611,6 +642,7 @@ function RegisterCreator() {
                   id="creator_password_verification"
                   type="password"
                   placeholder="비밀번호 확인"
+                  disabled={location.state !== null}
                 />
               </label>
               <hr />

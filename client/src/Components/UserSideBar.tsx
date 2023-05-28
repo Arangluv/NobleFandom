@@ -13,8 +13,8 @@ import { FaUser } from "react-icons/fa";
 import { GiCrownCoin } from "react-icons/gi";
 import { useRecoilValue } from "recoil";
 import { loginState } from "../atoms/atoms";
-import { useQuery } from "@tanstack/react-query";
 import { getCoinValue } from "../api/user/usesApi";
+import { useQuery } from "@tanstack/react-query";
 
 // Side Bar
 const SideBarContainer = styled.div`
@@ -195,8 +195,8 @@ const SubBarContainer = styled.div`
 interface CProps {
   coinQuantity: string;
 }
-function CreatorSideBar() {
-  const creatorLoginStste = useRecoilValue(loginState);
+function UserSideBar() {
+  const userLoginStste = useRecoilValue(loginState);
   const {
     isLoading,
     data: coin,
@@ -211,11 +211,6 @@ function CreatorSideBar() {
       message: "코인을 받아오는데 실패했습니다",
     },
   });
-  console.log(coin);
-  console.log(isLoading);
-  console.log(error);
-  console.log(isError);
-
   return (
     <SideBarContainer>
       <h1>
@@ -226,7 +221,7 @@ function CreatorSideBar() {
         <div id="user_container">
           <div id="profile_box">
             <div id="profile_box_border">
-              {creatorLoginStste.profileImg ? (
+              {userLoginStste.profileImg ? (
                 <img
                   src="https://i.ytimg.com/vi/CnNJtnoSU5U/maxresdefault.jpg"
                   alt=""
@@ -239,8 +234,8 @@ function CreatorSideBar() {
             </div>
           </div>
           <div id="user_meta_info">
-            <span id="user_name">{creatorLoginStste.username}</span>
-            <span id="user_id">@{creatorLoginStste.userId}</span>
+            <span id="user_name">{userLoginStste.username}</span>
+            <span id="user_id">@{userLoginStste.userId}</span>
           </div>
         </div>
         <ul>
@@ -280,12 +275,6 @@ function CreatorSideBar() {
               <span>좋아요 게시물</span>
             </li>
           </Link>
-          <Link to="creator-setting">
-            <li id="only_creator_list">
-              <RiVipLine />
-              <span>크리에이터 페이지</span>
-            </li>
-          </Link>
           <Link to="setting">
             <li>
               <BsFillGearFill />
@@ -309,4 +298,4 @@ function CreatorSideBar() {
   );
 }
 
-export default CreatorSideBar;
+export default UserSideBar;

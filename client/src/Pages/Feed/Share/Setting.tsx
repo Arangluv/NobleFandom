@@ -1,6 +1,9 @@
 import styled from "styled-components";
 import { BsFillGearFill } from "react-icons/bs";
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useNavigate } from "react-router-dom";
+import { useRecoilValue } from "recoil";
+import { loginState } from "../../../atoms/atoms";
+import { useEffect } from "react";
 const Wrapper = styled.div`
   width: 80%;
   min-height: 100vh;
@@ -69,6 +72,14 @@ const SettingOptionList = styled.div`
   }
 `;
 function Setting() {
+  const userLoginState = useRecoilValue(loginState);
+  const navigator = useNavigate();
+  useEffect(() => {
+    if (userLoginState.userType === "") {
+      navigator("/");
+      return;
+    }
+  }, []);
   return (
     <Wrapper>
       <SubWrapper>
@@ -84,9 +95,11 @@ function Setting() {
             <Link to="account">
               <li>계정설정</li>
             </Link>
-            <Link to="block">
-              <li>차단한 계정</li>
-            </Link>
+            {userLoginState.userType === "creator" ? (
+              <Link to="block">
+                <li>차단한 계정</li>
+              </Link>
+            ) : null}
             <Link to="apply-creator">
               <li>크리에이터 신청</li>
             </Link>

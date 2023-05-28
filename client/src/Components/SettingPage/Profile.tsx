@@ -1,6 +1,10 @@
 import styled from "styled-components";
 import { BsCardImage } from "react-icons/bs";
 import { FaUser } from "react-icons/fa";
+import { useForm } from "react-hook-form";
+import { useEffect } from "react";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { loginState } from "../../atoms/atoms";
 const SettingSubList = styled.div`
   width: 80%;
   height: 100%;
@@ -128,14 +132,36 @@ const ProfileSettingBox = styled.div`
     border-color: ${(props) => props.theme.accentColor};
   }
 `;
+interface DProps {
+  username: string | undefined;
+  userId: string | undefined;
+  userDescription: string | undefined;
+  profileImg: File;
+}
 function Profile() {
+  const userLoginState = useRecoilValue(loginState);
+  const { register, watch, setValue, formState, handleSubmit } =
+    useForm<DProps>();
+  useEffect(() => {
+    setValue("username", userLoginState?.username);
+    setValue("userId", userLoginState.userType);
+  }, []);
+  const onValid = async (data: DProps) => {
+    console.log(data);
+  };
+  console.log(formState.errors);
   return (
     <SettingSubList>
-      <form action="">
+      <form onSubmit={handleSubmit(onValid)}>
         <ProfileImageBox>
           <label htmlFor="profile_setting_image">
             <BsCardImage />
-            <input id="profile_setting_image" type="file" accept="image" />
+            <input
+              {...register("profileImg")}
+              id="profile_setting_image"
+              type="file"
+              accept="image"
+            />
           </label>
           <div>
             {/* <img src="" alt="profile setting image" /> */}
@@ -144,16 +170,43 @@ function Profile() {
         </ProfileImageBox>
         <ProfileSettingBox>
           <label htmlFor="profile_username">
-            <span>닉네임</span>
-            <input id="profile_username" type="text" placeholder="닉네임" />
+            <span>닉네임 {<small>하하하하</small>}</span>
+            <input
+              {...register("username", {
+                required: "닉네임을 입력해주세요",
+                minLength: {
+                  value: 2,
+                  message: "닉네임은 최소 두글자 이상으로 해주세요",
+                },
+              })}
+              id="profile_username"
+              type="text"
+              placeholder="닉네임"
+            />
           </label>
           <label htmlFor="profile_user_id">
             <span>유저 ID</span>
-            <input id="profile_user_id" type="text" placeholder="유저 ID" />
+            <input
+              {...register("userId", {
+                required: "사용할 ID를 입력해주세요",
+                minLength: {
+                  value: 4,
+                  message: "ID는 최소 4글자 이상의 영어로 적어주세요",
+                },
+                maxLength: {
+                  value: 20,
+                  message: "ID는 20글자를 넘길 수 없습니다.",
+                },
+              })}
+              id="profile_user_id"
+              type="text"
+              placeholder="유저 ID"
+            />
           </label>
           <label htmlFor="profile_introduction">
             <span>자기소개</span>
             <textarea
+              {...register("userDescription")}
               id="profile_introduction"
               placeholder="자신의 피드에 보여줄 자기소개를 적어주세요"
             />

@@ -1,7 +1,7 @@
 import axios from "axios";
 import { jwtConfig } from "../configs/jwtConfig.js";
-import { cookiesConfig } from "../configs/cookiesConfig.js";
 import jwt from "jsonwebtoken";
+import { cookiesConfig } from "../configs/cookiesConfig.js";
 import bcrypt from "bcrypt";
 import User from "../models/User.js";
 import ApplicationForm from "../models/ApplicationForm.js";
@@ -93,6 +93,7 @@ export const googleLogin = async (req, res) => {
           userId: user.userId,
           backGroundImg: user.backGroundImg,
           profileImg: user.profileImg,
+          email: user.email,
         });
     }
     if (creator && !user) {
@@ -111,6 +112,7 @@ export const googleLogin = async (req, res) => {
           userId: creator.userId,
           backGroundImg: creator.backGroundImg,
           profileImg: creator.profileImg,
+          email: creator.email,
         });
     }
     return res.status(404).json({ message: "구글로그인에 실패했습니다" });
@@ -137,7 +139,15 @@ export const userJoin = async (req, res) => {
         }
       )
       .status(200)
-      .json({ message: "회원가입에 성공했습니다" });
+      .json({
+        message: "회원가입에 성공했습니다",
+        username,
+        userId,
+        profileImg: null,
+        backGroundImg: null,
+        userType: "user",
+        email,
+      });
   } catch (error) {
     return res.status(404).json({ message: error.message });
   }
@@ -178,6 +188,7 @@ export const userLogin = async (req, res) => {
           userType: user.userType,
           profileImg: user.profileImg,
           backGroundImg: user.backGroundImg,
+          email: user.email,
         });
     }
     if (creatorExist) {
@@ -207,6 +218,7 @@ export const userLogin = async (req, res) => {
           userType: creator.userType,
           profileImg: creator.profileImg,
           backGroundImg: creator.backGroundImg,
+          email: creator.email,
         });
     }
   } catch (error) {
@@ -266,7 +278,6 @@ export const creatorRegister = async (req, res) => {
     };
     const token = jwt.sign(payload, secretKey, options);
     const tokenConfig = cookiesConfig();
-    console.log(tokenConfig);
     await ApplicationForm.create({
       owner: user._id,
       snsInfo: [
@@ -295,24 +306,32 @@ export const tokenInspect = async (req, res) => {
   try {
     const { token } = req.cookies;
     if (!token) {
-      return res.status(204).send();
+      return res.status(200).json({
+        userType: "",
+        userId: "",
+        username: "",
+        profileImg: null,
+        backGroundImg: null,
+      });
     }
     const { secretKey } = jwtConfig;
     const data = jwt.verify(token, secretKey);
     const { id } = data;
     const user = await User.findById(id);
     if (user) {
-      const { userType, username, userId, profileImg, backGroundImg } = user;
+      const { userType, username, userId, profileImg, backGroundImg, email } =
+        user;
       return res
         .status(200)
-        .json({ userType, username, userId, profileImg, backGroundImg });
+        .json({ userType, username, userId, profileImg, backGroundImg, email });
     }
     const creator = await Creator.findById(id);
     if (creator) {
-      const { userType, username, userId, profileImg, backGroundImg } = creator;
+      const { userType, username, userId, profileImg, backGroundImg, email } =
+        creator;
       return res
         .status(200)
-        .json({ userType, username, userId, profileImg, backGroundImg });
+        .json({ userType, username, userId, profileImg, backGroundImg, email });
     }
     return res.status(204).json({
       message: "토큰이 만료 또는 유효하지 않은 토큰이거나, 유저가 없습니다",
@@ -323,5 +342,16 @@ export const tokenInspect = async (req, res) => {
     return res
       .status(404)
       .json({ message: "토큰 검사 중 오류가 발생했습니다." });
+  }
+};
+
+export const userLogout = async (req, res) => {
+  try {
+    return res
+      .clearCookie("token")
+      .status(200)
+      .json({ message: "로그아웃에 성공했습니다" });
+  } catch (error) {
+    res.status(404).json({ message: "로그아웃을 처리하는데 실패했습니다" });
   }
 };

@@ -5,8 +5,8 @@ import { theme } from "./styles/theme";
 import Routers from "./Routers";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { userTokenInspect } from "./api/user/usesApi";
-import { ToastContainer, toast } from "react-toastify";
-import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+import { ToastContainer } from "react-toastify";
+import { useRecoilValue, useSetRecoilState } from "recoil";
 import { loginState } from "./atoms/atoms";
 import "react-toastify/dist/ReactToastify.css";
 import { useEffect } from "react";
@@ -16,24 +16,32 @@ interface LoginProps {
   userId: string | undefined;
   userType: string | undefined;
   username: string | undefined;
+  email: string | undefined;
 }
 function App() {
+  const setUserLogin = useSetRecoilState(loginState);
+  const userLoginState = useRecoilValue(loginState);
   const { isLoading, data: userState } = useQuery<LoginProps | undefined>({
     queryKey: ["usertoken"],
     queryFn: userTokenInspect,
-    staleTime: 1000 * 10,
+    staleTime: 1000 * 60 * 20,
+    // staleTime: 1000 * 10,
     cacheTime: Infinity,
-    retry: false,
+    retry: 2,
     // meta: {
     //   message: "토큰을 받아오는데 실패했습니다",
     // },
   });
-  const setUserLogin = useSetRecoilState(loginState);
+  // 유저 로그인 상태 처리
   useEffect(() => {
+    if (isLoading) {
+      return;
+    }
     if (userState) {
       setUserLogin({ ...userState });
     }
   }, [isLoading]);
+
   return (
     <ThemeProvider theme={theme}>
       <GlobalStyle />

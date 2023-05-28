@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { AiFillFacebook, AiFillGoogleSquare } from "react-icons/ai";
@@ -7,9 +7,9 @@ import GoogleLoginBnt from "./GoogleLoginBnt";
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import BASE_URL from "../../url";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { HashLoader } from "react-spinners";
-import { useSetRecoilState } from "recoil";
+import { useRecoilState, useSetRecoilState } from "recoil";
 import { loginState } from "../../atoms/atoms";
 const Wrapper = styled.div`
   width: 100%;
@@ -189,7 +189,8 @@ interface DataProps {
 }
 function UserLogin() {
   const [isLoading, setIsLoading] = useState(false);
-  const setLoginState = useSetRecoilState(loginState);
+  const [userLoginState, setUserLoginState] = useRecoilState(loginState);
+  const navigator = useNavigate();
   const { register, watch, formState, setError, handleSubmit, clearErrors } =
     useForm<DataProps>();
   let googleOauthClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID || "";
@@ -209,8 +210,9 @@ function UserLogin() {
         const { data } = result;
         delete data.message;
         console.log(data);
-        setLoginState({ ...data });
+        setUserLoginState({ ...data });
         setIsLoading(false);
+        navigator("/", { replace: true });
       })
       .catch((error) => {
         setIsLoading(false);
@@ -219,6 +221,14 @@ function UserLogin() {
         });
       });
   };
+
+  // Invalid Access Check
+  useEffect(() => {
+    if (userLoginState.userType === "") {
+      return;
+    }
+    navigator("/main", { replace: true });
+  }, []);
   return (
     <>
       <Wrapper>

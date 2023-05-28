@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { BsArrowRightCircle } from "react-icons/bs";
+import { useRecoilValue } from "recoil";
+import { loginState } from "../../atoms/atoms";
 const SettingSubList = styled.div`
   width: 80%;
   height: 100%;
@@ -37,9 +39,17 @@ const SettingSubList = styled.div`
 
 function CreatorApply() {
   // Register-creator로 이동시킬때 state를 이용해 이메일 정보를 전송해야한다.
+  const userLoginState = useRecoilValue(loginState);
   return (
     <SettingSubList>
-      <Link to="/register-creator">
+      <Link
+        to="/register-creator"
+        state={{
+          email: userLoginState.email,
+          username: userLoginState.username,
+          userId: userLoginState.userId,
+        }}
+      >
         크리에이터 신청페이지로 <BsArrowRightCircle />
       </Link>
     </SettingSubList>

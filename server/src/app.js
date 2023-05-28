@@ -6,6 +6,7 @@ import morgan from "morgan";
 import globalRouter from "./routers/globalRouter.js";
 import adminRouter from "./routers/adminRouter.js";
 import { logger } from "./utils/logger.js";
+import userRouter from "./routers/userRouter.js";
 const app = express();
 app.use(
   morgan(":method :status :url :response-time ms", { stream: logger.stream })
@@ -24,6 +25,7 @@ app.use(helmet());
 
 app.use("/", globalRouter);
 app.use("/admin", adminRouter);
+app.use("/users", userRouter);
 // bad path
 app.use((req, res, next) => {
   res.status(404).send("Not found");

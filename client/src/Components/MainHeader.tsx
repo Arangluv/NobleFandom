@@ -1,10 +1,11 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Link } from "react-router-dom";
-import { useRecoilValue } from "recoil";
+import { useRecoilValue, useSetRecoilState } from "recoil";
 import styled from "styled-components";
 import { loginState } from "../atoms/atoms";
-import { useState } from "react";
-import axios from "axios";
+import { userLogout } from "../api/user/usesApi";
+import { toast } from "react-toastify";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 const Header = styled(motion.header)`
   position: fixed;
   width: 100%;
@@ -96,17 +97,42 @@ const hdVarients = {
 };
 function MainHeader() {
   // 유저의 위치가 Login이면 ul을 비워준다.
-  const [loading, setLoading] = useState(false);
   const { scrollYProgress } = useScroll({ offset: ["150vh", "155vh"] });
+  const setUserLoginState = useSetRecoilState(loginState);
   const backgroundColor = useTransform(
     scrollYProgress,
     [0, 1],
     ["rgba(0,0,0,0)", "rgba(0,0,0,1)"]
   );
+  const queryClient = useQueryClient();
+
+  const { mutate, isLoading } = useMutation({
+    mutationFn: userLogout,
+    onSuccess: () => {
+      toast.success("로그아웃 하였습니다!");
+      setUserLoginState({
+        username: "",
+        userId: "",
+        userType: "",
+        profileImg: null,
+        backGroundImg: null,
+        email: "",
+      });
+      return queryClient.invalidateQueries({
+        queryKey: ["usertoken"],
+      });
+    },
+    onError: () => {
+      toast.error("로그아웃을 하는데 문제가 발생했습니다 다시 진행해주세요.");
+    },
+  });
   const userState = useRecoilValue(loginState);
-  // const handleLogout = async () => {
-  //   await axios.
-  // };
+  const handleLogout = () => {
+    if (isLoading) {
+      return;
+    }
+    mutate();
+  };
   return (
     <Header
       style={{ backgroundColor }}
@@ -144,7 +170,7 @@ function MainHeader() {
         ) : (
           <>
             <Link to="/main">메인페이지</Link>
-            <span>로그아웃</span>
+            <span onClick={handleLogout}>로그아웃</span>
           </>
         )}
       </div>

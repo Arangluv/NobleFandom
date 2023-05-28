@@ -1,7 +1,10 @@
 import styled from "styled-components";
 import { Outlet } from "react-router-dom";
-import { toast } from "react-toastify";
 import CreatorSideBar from "../../Components/CreatorSideBar";
+import SideBar from "../../Components/SideBar";
+import UserSideBar from "../../Components/UserSideBar";
+import { useRecoilValue } from "recoil";
+import { loginState } from "../../atoms/atoms";
 const Wrapper = styled.div`
   width: 100%;
   height: auto;
@@ -11,9 +14,16 @@ const Wrapper = styled.div`
 `;
 
 function FeedMain() {
+  const userLoginState = useRecoilValue(loginState);
   return (
     <Wrapper>
-      <CreatorSideBar />
+      {userLoginState.userType === "" ? (
+        <SideBar />
+      ) : userLoginState.userType === "user" ? (
+        <UserSideBar />
+      ) : (
+        <CreatorSideBar />
+      )}
       <Outlet />
     </Wrapper>
   );

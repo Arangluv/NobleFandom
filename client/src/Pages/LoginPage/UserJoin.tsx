@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
@@ -7,6 +7,8 @@ import SideBar from "../../Components/SideBar";
 import { AiOutlineCheck } from "react-icons/ai";
 import uuid from "react-uuid";
 import axios from "axios";
+import { loginState } from "../../atoms/atoms";
+import { useRecoilState } from "recoil";
 const Wrapper = styled.div`
   height: 250vh;
   width: 100%;
@@ -230,6 +232,7 @@ function UserJoin() {
   const [errorMsg, setErrorMsg] = useState("");
   const { register, handleSubmit, formState, setError } = useForm<IForm>();
   const navigator = useNavigate();
+  const [userLoginState, setUserLoginState] = useRecoilState(loginState);
   const onValid = async (data: IForm) => {
     setLoading(true);
     if (data.password !== data.passwordConfirm) {
@@ -242,7 +245,7 @@ function UserJoin() {
       return;
     }
     try {
-      await axios.post(
+      const result = await axios.post(
         `${BASE_URL}/join`,
         {
           email: data.email,
@@ -253,6 +256,15 @@ function UserJoin() {
         },
         { withCredentials: true }
       );
+      const newLoginState = {
+        username: result.data.username,
+        userType: result.data.userType,
+        userId: result.data.userId,
+        profileImg: result.data.profileImg,
+        backGroundImg: result.data.backGroundImg,
+        email: result.data.email,
+      };
+      setUserLoginState({ ...newLoginState });
       setLoading(false);
       navigator("/main");
     } catch (error: any) {
@@ -261,6 +273,14 @@ function UserJoin() {
       setLoading(false);
     }
   };
+
+  // Invalid Access Check
+  useEffect(() => {
+    if (userLoginState.userType === "") {
+      return;
+    }
+    navigator("/main", { replace: true });
+  }, []);
   return (
     <Wrapper>
       <SideBar />
