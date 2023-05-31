@@ -17,6 +17,8 @@ interface LoginProps {
   userType: string | undefined;
   username: string | undefined;
   email: string | undefined;
+  profileDescription: string | undefined;
+  socialOnly: boolean;
 }
 function App() {
   const setUserLogin = useSetRecoilState(loginState);

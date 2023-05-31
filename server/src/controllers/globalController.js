@@ -74,6 +74,9 @@ export const googleLogin = async (req, res) => {
           userId: user.userId,
           backGroundImg: null,
           profileImg: null,
+          profileDescription: user.profileDescription,
+          email: user.email,
+          socialOnly: true,
         });
     }
     // 일반유저 유저인
@@ -94,6 +97,8 @@ export const googleLogin = async (req, res) => {
           backGroundImg: user.backGroundImg,
           profileImg: user.profileImg,
           email: user.email,
+          profileDescription: user.profileDescription,
+          socialOnly: true,
         });
     }
     if (creator && !user) {
@@ -113,6 +118,8 @@ export const googleLogin = async (req, res) => {
           backGroundImg: creator.backGroundImg,
           profileImg: creator.profileImg,
           email: creator.email,
+          profileDescription: creator.profileDescription,
+          socialOnly: true,
         });
     }
     return res.status(404).json({ message: "구글로그인에 실패했습니다" });
@@ -147,6 +154,8 @@ export const userJoin = async (req, res) => {
         backGroundImg: null,
         userType: "user",
         email,
+        profileDescription: "",
+        socialOnly: false,
       });
   } catch (error) {
     return res.status(404).json({ message: error.message });
@@ -189,6 +198,8 @@ export const userLogin = async (req, res) => {
           profileImg: user.profileImg,
           backGroundImg: user.backGroundImg,
           email: user.email,
+          profileDescription: user.profileDescription,
+          socialOnly: user.socialOnly,
         });
     }
     if (creatorExist) {
@@ -219,6 +230,8 @@ export const userLogin = async (req, res) => {
           profileImg: creator.profileImg,
           backGroundImg: creator.backGroundImg,
           email: creator.email,
+          profileDescription: creator.profileDescription,
+          socialOnly: creator.socialOnly,
         });
     }
   } catch (error) {
@@ -312,6 +325,9 @@ export const tokenInspect = async (req, res) => {
         username: "",
         profileImg: null,
         backGroundImg: null,
+        socialOnly: false,
+        profileDescription: "",
+        email: "",
       });
     }
     const { secretKey } = jwtConfig;
@@ -319,19 +335,49 @@ export const tokenInspect = async (req, res) => {
     const { id } = data;
     const user = await User.findById(id);
     if (user) {
-      const { userType, username, userId, profileImg, backGroundImg, email } =
-        user;
-      return res
-        .status(200)
-        .json({ userType, username, userId, profileImg, backGroundImg, email });
+      const {
+        userType,
+        username,
+        userId,
+        profileImg,
+        backGroundImg,
+        email,
+        profileDescription,
+        socialOnly,
+      } = user;
+      return res.status(200).json({
+        userType,
+        username,
+        userId,
+        profileImg,
+        backGroundImg,
+        email,
+        profileDescription,
+        socialOnly,
+      });
     }
     const creator = await Creator.findById(id);
     if (creator) {
-      const { userType, username, userId, profileImg, backGroundImg, email } =
-        creator;
-      return res
-        .status(200)
-        .json({ userType, username, userId, profileImg, backGroundImg, email });
+      const {
+        userType,
+        username,
+        userId,
+        profileImg,
+        backGroundImg,
+        email,
+        profileDescription,
+        socialOnly,
+      } = creator;
+      return res.status(200).json({
+        userType,
+        username,
+        userId,
+        profileImg,
+        backGroundImg,
+        email,
+        profileDescription,
+        socialOnly,
+      });
     }
     return res.status(204).json({
       message: "토큰이 만료 또는 유효하지 않은 토큰이거나, 유저가 없습니다",

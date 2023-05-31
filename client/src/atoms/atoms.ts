@@ -7,7 +7,10 @@ interface LoginProps {
   userType: string | undefined;
   username: string | undefined;
   email: string | undefined;
+  profileDescription: string | undefined;
+  socialOnly: boolean;
 }
+
 export const userFeedLayout = atom<
   null | "subscribe" | "feed" | "request" | "response"
 >({
@@ -24,5 +27,7 @@ export const loginState = atom<LoginProps>({
     userType: "",
     username: "",
     email: "",
+    profileDescription: "",
+    socialOnly: false,
   },
 });

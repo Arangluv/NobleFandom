@@ -263,6 +263,8 @@ function UserJoin() {
         profileImg: result.data.profileImg,
         backGroundImg: result.data.backGroundImg,
         email: result.data.email,
+        profileDescription: result.data.profileDescription,
+        socialOnly: result.data.socialOnly
       };
       setUserLoginState({ ...newLoginState });
       setLoading(false);

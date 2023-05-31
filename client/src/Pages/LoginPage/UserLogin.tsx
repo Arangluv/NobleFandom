@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { GoogleOAuthProvider } from "@react-oauth/google";
-import { AiFillFacebook, AiFillGoogleSquare } from "react-icons/ai";
+import { AiFillFacebook } from "react-icons/ai";
 import SideBar from "../../Components/SideBar";
 import GoogleLoginBnt from "./GoogleLoginBnt";
 import { useForm } from "react-hook-form";

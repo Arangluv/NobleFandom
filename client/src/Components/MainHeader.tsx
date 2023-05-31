@@ -117,6 +117,8 @@ function MainHeader() {
         profileImg: null,
         backGroundImg: null,
         email: "",
+        profileDescription: "",
+        socialOnly: false,
       });
       return queryClient.invalidateQueries({
         queryKey: ["usertoken"],

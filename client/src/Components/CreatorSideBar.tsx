@@ -211,11 +211,6 @@ function CreatorSideBar() {
       message: "코인을 받아오는데 실패했습니다",
     },
   });
-  console.log(coin);
-  console.log(isLoading);
-  console.log(error);
-  console.log(isError);
-
   return (
     <SideBarContainer>
       <h1>
@@ -227,10 +222,7 @@ function CreatorSideBar() {
           <div id="profile_box">
             <div id="profile_box_border">
               {creatorLoginStste.profileImg ? (
-                <img
-                  src="https://i.ytimg.com/vi/CnNJtnoSU5U/maxresdefault.jpg"
-                  alt=""
-                />
+                <img src={creatorLoginStste.profileImg} alt="Creator profile image" />
               ) : (
                 <span>
                   <FaUser />

@@ -222,10 +222,7 @@ function UserSideBar() {
           <div id="profile_box">
             <div id="profile_box_border">
               {userLoginStste.profileImg ? (
-                <img
-                  src="https://i.ytimg.com/vi/CnNJtnoSU5U/maxresdefault.jpg"
-                  alt=""
-                />
+                <img src={userLoginStste.profileImg} alt="user profile image" />
               ) : (
                 <span>
                   <FaUser />

@@ -1,6 +1,19 @@
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import BASE_URL from "../../url";
-
+interface UserInfoResponse {
+  username: string | undefined;
+  userId: string | undefined;
+  profileImg: string | null | undefined;
+  backgroundImg: string | null | undefined;
+  profileDescription: string | undefined;
+  socialOnly: boolean;
+}
+interface UserPasswordChange {
+  currentPassword: string;
+  changePassword: string;
+  changePasswordConfirm: string;
+  userType: string | undefined;
+}
 export const userTokenInspect = async () => {
   return await axios
     .get(`${BASE_URL}/token-inspect`, {
@@ -25,4 +38,27 @@ export const getCoinValue = async () => {
       withCredentials: true,
     })
     .then((result) => result.data);
+};
+
+export const postEditProfile = async (
+  formData: FormData
+): Promise<AxiosResponse<UserInfoResponse>> => {
+  return await axios({
+    url: `${BASE_URL}/users/edit-profile`,
+    method: "POST",
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+
+    data: formData,
+  });
+};
+
+export const postChangePassword = async (data: UserPasswordChange) => {
+  return await axios({
+    url: `${BASE_URL}/users/change-password`,
+    method: "POST",
+    withCredentials: true,
+    data,
+  });
 };
