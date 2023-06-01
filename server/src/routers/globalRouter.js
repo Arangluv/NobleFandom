@@ -6,6 +6,9 @@ import {
   creatorRegister,
   tokenInspect,
   userLogout,
+  postPasswordFind,
+  postUserFind,
+  postFindAndChange,
 } from "../controllers/globalController.js";
 import aws from "aws-sdk";
 import multer from "multer";
@@ -40,5 +43,7 @@ globalRouter
 globalRouter.route("/login").post(userLogin);
 globalRouter.route("/token-inspect").get(tokenInspect);
 globalRouter.route("/userLogout").post(userLogout);
-
+globalRouter.route("/password-find").post(postPasswordFind);
+globalRouter.route("/user-find").post(postUserFind);
+globalRouter.route("/find-and-change").post(postFindAndChange);
 export default globalRouter;

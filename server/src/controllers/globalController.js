@@ -9,6 +9,7 @@ import { createUser, tokenIssuance } from "../utils/userUtils.js";
 import Creator from "../models/Creator.js";
 import NobleCoin from "../models/NobleCoin.js";
 import Alarm from "../models/Alarm.js";
+import * as nodemailer from "nodemailer";
 export const googleLogin = async (req, res) => {
   const { access_token, userId, username } = req.body;
   try {
@@ -399,5 +400,88 @@ export const userLogout = async (req, res) => {
       .json({ message: "로그아웃에 성공했습니다" });
   } catch (error) {
     res.status(404).json({ message: "로그아웃을 처리하는데 실패했습니다" });
+  }
+};
+export const postUserFind = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      throw new Error("유저가 없습니다");
+    }
+    return res.status(200).json({ message: "유저가 있습니다", email });
+  } catch (error) {
+    return res.status(404).json({ message: error.message });
+  }
+};
+export const postPasswordFind = async (req, res) => {
+  try {
+    const { authNumber } = req.body;
+    console.log(authNumber);
+    const smtpTransport = nodemailer.createTransport({
+      service: "naver",
+      host: "smtp.naver.com", // SMTP 서버명
+      port: 465, // SMTP 포트
+      auth: {
+        user: "bobobe3@naver.com", // mail 발송 이메일 주소
+        pass: "ru09457295@!", // 해당 이메일 비밀번호
+      },
+      // tls: {
+      //   rejectUnauthorized: false,
+      // },
+    });
+
+    const mailOptions = {
+      from: "bobobe3@naver.com", // 발송 주체
+      to: "ruhunsu3@naver.com", // 인증을 요청한 이메일 주소
+      subject: "[NobleFandom] 이메일 확인 인증번호 안내", // 이메일 제목
+      text: `아래 인증번호를 확인하여 이메일 주소 인증을 완료해 주세요.\n
+    연락처 이메일 👉 ${"noblefandom@naver.com"}\n
+    인증번호 6자리 👉 ${authNumber}`, // 이메일 내용
+    };
+
+    smtpTransport.sendMail(mailOptions, (error, responses) => {
+      if (error) {
+        res.status(500).json({
+          message: `Failed to send authentication email to ruhunsu3@naver.com`,
+          authNumber,
+        });
+      } else {
+        res.status(200).json({
+          authNumber,
+          message: `Authentication mail is sent to ruhunsu3@naver.com`,
+        });
+      }
+      smtpTransport.close();
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(404).json({ message: "실패" });
+  }
+};
+export const postFindAndChange = async (req, res) => {
+  try {
+    const { changePassword, email } = req.body;
+    const user = await User.findOne({ email });
+    const creator = await Creator.findOne({ email });
+    if (!user && !creator) {
+      throw new Error("이메일에 대한 정보가 없습니다");
+    }
+    if (user) {
+      user.password = changePassword;
+      await user.save();
+      return res
+        .status(200)
+        .json({ message: "비밀번호를 성공적으로 바꾸었습니다" });
+    }
+    if (creator) {
+      creator.password = changePassword;
+      await creator.save();
+      return res
+        .status(200)
+        .json({ message: "비밀번호를 성공적으로 바꾸었습니다" });
+    }
+  } catch (error) {
+    return res.status(404).json({ message: error.message });
   }
 };

@@ -42,6 +42,7 @@ import MembershipPlanSetting from "./Components/OnlyCreatorPage/MembershipPlanSe
 import UserJoin from "./Pages/LoginPage/UserJoin";
 import AdminMain from "./Pages/Admin/AdminMain";
 import RegisterList from "./Pages/Admin/RegisterList";
+import PasswordFind from "./Pages/LoginPage/PasswordFind";
 function Routers() {
   return (
     <BrowserRouter>
@@ -57,6 +58,7 @@ function Routers() {
         <Route path="/withus" element={<WithUs />} />
         <Route path="/login" element={<UserLogin />} />
         <Route path="/join" element={<UserJoin />} />
+        <Route path="/password-find" element={<PasswordFind />} />
         <Route path="/register-creator" element={<RegisterCreator />} />
         <Route path="/register-partner" element={<RegisterPartner />} />
         <Route

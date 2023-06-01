@@ -37,6 +37,15 @@ const LoginToEmailBox = styled.div`
     font-weight: 700;
     text-shadow: ${(props) => props.theme.textShadow};
   }
+  #password_find {
+    color: white;
+    display: flex;
+    justify-content: flex-end;
+    width: 60%;
+    margin-top: 0.5vw;
+    font-size: 1vw;
+    text-shadow: ${(props) => props.theme.textShadow};
+  }
   form {
     display: flex;
     width: 60%;
@@ -100,18 +109,19 @@ const LoginToEmailBox = styled.div`
     a:hover {
       box-shadow: #fbc531 0px 0px 10px;
     }
-  }
-  span {
-    color: white;
-    display: flex;
-    justify-content: flex-end;
-    width: 60%;
-    margin-top: 0.5vw;
-    font-size: 1vw;
-    text-shadow: ${(props) => props.theme.textShadow};
-  }
-  span:hover {
-    cursor: pointer;
+
+    span {
+      color: white;
+      display: flex;
+      justify-content: flex-end;
+      width: 60%;
+      margin-top: 0.5vw;
+      font-size: 1vw;
+      text-shadow: ${(props) => props.theme.textShadow};
+    }
+    span:hover {
+      cursor: pointer;
+    }
   }
 `;
 const SocialLoginBox = styled.div`
@@ -267,7 +277,9 @@ function UserLogin() {
               <input type="submit" value="로그인" />
               <Link to="/join">회원가입</Link>
             </form>
-            <span>비밀번호를 잊으셨나요?</span>
+            <Link id="password_find" to="/password-find">
+              <span>비밀번호를 잊으셨나요?</span>
+            </Link>
           </LoginToEmailBox>
           <SocialLoginBox>
             <span>SNS로 로그인하기 </span>

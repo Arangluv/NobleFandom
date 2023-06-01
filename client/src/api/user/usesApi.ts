@@ -14,6 +14,10 @@ interface UserPasswordChange {
   changePasswordConfirm: string;
   userType: string | undefined;
 }
+interface UserFindPasswordAndChange {
+  email: string;
+  changePassword: string;
+}
 export const userTokenInspect = async () => {
   return await axios
     .get(`${BASE_URL}/token-inspect`, {
@@ -57,6 +61,17 @@ export const postEditProfile = async (
 export const postChangePassword = async (data: UserPasswordChange) => {
   return await axios({
     url: `${BASE_URL}/users/change-password`,
+    method: "POST",
+    withCredentials: true,
+    data,
+  });
+};
+
+export const postPasswordFindAndChange = async (
+  data: UserFindPasswordAndChange
+) => {
+  return await axios({
+    url: `${BASE_URL}/find-and-change`,
     method: "POST",
     withCredentials: true,
     data,
