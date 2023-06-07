@@ -1,6 +1,5 @@
 import styled from "styled-components";
 import { RiMailSendLine } from "react-icons/ri";
-import { BsCardImage } from "react-icons/bs";
 const ChatSubmitForm = styled.form`
   width: 100%;
   height: 5vw;
@@ -10,6 +9,8 @@ const ChatSubmitForm = styled.form`
   display: flex;
   justify-content: center;
   align-items: center;
+  position: absolute;
+  bottom: 0.5vw;
   input[type="text"] {
     width: 90%;
     height: 3vw;
@@ -48,7 +49,6 @@ const ChatSubmitForm = styled.form`
     }
   }
 `;
-
 function ChatSubmitUser() {
   return (
     <ChatSubmitForm>

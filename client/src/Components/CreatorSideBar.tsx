@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 // SideBar
 import {
   AiOutlineHome,
@@ -7,14 +7,20 @@ import {
   AiOutlineMessage,
   AiFillHeart,
 } from "react-icons/ai";
+import { WiMoonAltNew } from "react-icons/wi";
 import { RiVipDiamondLine, RiVipLine } from "react-icons/ri";
 import { BsFillGearFill, BsSearch } from "react-icons/bs";
 import { FaUser } from "react-icons/fa";
 import { GiCrownCoin } from "react-icons/gi";
 import { useRecoilValue } from "recoil";
 import { loginState } from "../atoms/atoms";
-import { useQuery } from "@tanstack/react-query";
-import { getCoinValue } from "../api/user/usesApi";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  getAlarmsState,
+  getCoinValue,
+  postAlarmsClick,
+} from "../api/user/usesApi";
+import { toast } from "react-toastify";
 
 // Side Bar
 const SideBarContainer = styled.div`
@@ -50,6 +56,9 @@ const SubBarContainer = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
+    &:hover {
+      cursor: pointer;
+    }
     #profile_box {
       width: 40%;
       display: flex;
@@ -111,6 +120,18 @@ const SubBarContainer = styled.div`
     margin-top: 1vw;
     display: flex;
     flex-direction: column;
+    #alarm_container,
+    #message_container {
+      position: relative;
+      #exclamation_mark {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        left: 2vw;
+        top: 0.5vw;
+        color: ${(props) => props.theme.textRedColor};
+      }
+    }
     li {
       display: flex;
       align-items: center;
@@ -195,14 +216,27 @@ const SubBarContainer = styled.div`
 interface CProps {
   coinQuantity: string;
 }
+interface AProps {
+  alarms: {
+    isNewAlarm: boolean;
+    isNewMessage: boolean;
+  };
+}
 function CreatorSideBar() {
   const creatorLoginStste = useRecoilValue(loginState);
-  const {
-    isLoading,
-    data: coin,
-    error,
-    isError,
-  } = useQuery<CProps | undefined>({
+  const navigator = useNavigate();
+  const { isLoading: alarmsLoading, data: alarms } = useQuery<
+    AProps | undefined
+  >({
+    queryKey: ["newAlarms"],
+    queryFn: getAlarmsState,
+    staleTime: 1000 * 60 * 5,
+    cacheTime: Infinity,
+    meta: {
+      message: "알람상태를 업데이트 하는데 실패했습니다",
+    },
+  });
+  const { isLoading, data: coin } = useQuery<CProps | undefined>({
     queryKey: ["nobleCoinValue"],
     queryFn: getCoinValue,
     staleTime: 1000 * 60 * 5,
@@ -211,6 +245,28 @@ function CreatorSideBar() {
       message: "코인을 받아오는데 실패했습니다",
     },
   });
+  const queryClient = useQueryClient();
+  const { mutate } = useMutation({
+    mutationFn: postAlarmsClick,
+    onSuccess: () => {
+      return queryClient.invalidateQueries({
+        queryKey: ["newAlarms"],
+      });
+    },
+    onError: () => {
+      console.log("실패");
+    },
+  });
+  const handleAlarmClick = () => {
+    if (!creatorLoginStste.email) {
+      return;
+    }
+    if (!alarms?.alarms.isNewAlarm) {
+      return;
+    }
+    const email = creatorLoginStste.email;
+    mutate({ email });
+  };
   return (
     <SideBarContainer>
       <h1>
@@ -218,11 +274,17 @@ function CreatorSideBar() {
       </h1>
       <SubBarContainer>
         {/* 만약 프로필사진이 있으면 다른 경우로 만들어줘야함 ex. border none .. */}
-        <div id="user_container">
+        <div
+          id="user_container"
+          onClick={() => navigator(`${creatorLoginStste.userId}`)}
+        >
           <div id="profile_box">
             <div id="profile_box_border">
               {creatorLoginStste.profileImg ? (
-                <img src={creatorLoginStste.profileImg} alt="Creator profile image" />
+                <img
+                  src={creatorLoginStste.profileImg}
+                  alt="Creator profile image"
+                />
               ) : (
                 <span>
                   <FaUser />
@@ -243,8 +305,11 @@ function CreatorSideBar() {
             </li>
           </Link>
           <Link to="alarm">
-            <li>
+            <li id="alarm_container" onClick={handleAlarmClick}>
               <AiOutlineBell />
+              {alarms?.alarms.isNewAlarm ? (
+                <WiMoonAltNew id="exclamation_mark" />
+              ) : null}
               <span>알림</span>
             </li>
           </Link>
@@ -255,8 +320,11 @@ function CreatorSideBar() {
             </li>
           </Link>
           <Link to="chat">
-            <li>
+            <li id="message_container">
               <AiOutlineMessage />
+              {alarms?.alarms?.isNewMessage ? (
+                <WiMoonAltNew id="exclamation_mark" />
+              ) : null}
               <span>메시지</span>
             </li>
           </Link>

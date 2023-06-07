@@ -1,5 +1,9 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
+import moment from "moment";
+
+const date = new Date();
+date.setHours(date.getHours() + 9);
 
 const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
@@ -24,7 +28,7 @@ const userSchema = new mongoose.Schema({
   likedFeed: [{ type: mongoose.Schema.Types.ObjectId, ref: "Feed" }], // ok
   alarms: { type: mongoose.Schema.Types.ObjectId, ref: "Alarm" }, // ok
   request: [{ type: mongoose.Schema.Types.ObjectId, ref: "Request" }], // ok
-  createdAt: { type: Date, default: Date.now },
+  createdAt: { type: Date, default: date },
   nobleCoin: { type: mongoose.Schema.Types.ObjectId, ref: "NobleCoin" },
   chat: {
     chatting: {
@@ -34,7 +38,7 @@ const userSchema = new mongoose.Schema({
     },
     chatWith: [{ type: mongoose.Schema.Types.ObjectId }], // 메세지를 주고 받은 사람들
   }, //ok
-  createdAt: { type: Date, default: Date.now },
+  createdAt: { type: Date, default: date },
 });
 
 userSchema.pre("save", async function () {

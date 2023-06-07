@@ -120,9 +120,15 @@ function MainHeader() {
         profileDescription: "",
         socialOnly: false,
       });
-      return queryClient.invalidateQueries({
-        queryKey: ["usertoken"],
-      });
+      return queryClient.clear();
+      // return queryClient.invalidateQueries({
+      //   queryKey: [
+      //     "usertoken",
+      //     "alarmPageAlarms",
+      //     "nobleCoinValue",
+      //     "newAlarms",
+      //   ],
+      // });
     },
     onError: () => {
       toast.error("로그아웃을 하는데 문제가 발생했습니다 다시 진행해주세요.");

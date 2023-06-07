@@ -1,6 +1,9 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 
+const date = new Date();
+date.setHours(date.getHours() + 9);
+
 const creatorSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   username: { type: String, required: true, unique: true },
@@ -30,14 +33,18 @@ const creatorSchema = new mongoose.Schema({
   following: [{ type: mongoose.Schema.Types.ObjectId }],
   blockUser: [{ type: mongoose.Schema.Types.ObjectId }],
   likedFeed: [{ type: mongoose.Schema.Types.ObjectId, ref: "Feed" }],
-  alarms: [{ type: mongoose.Schema.Types.ObjectId, ref: "Alarm" }],
+  alarms: { type: mongoose.Schema.Types.ObjectId, ref: "Alarm" },
   vipUser: [{ type: mongoose.Schema.Types.ObjectId }],
   membershipPlan: [
     { type: mongoose.Schema.Types.ObjectId, ref: "MembershipPlan" },
   ],
+  messageSetting: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "MessageSetting",
+  },
   feed: [{ type: mongoose.Schema.Types.ObjectId, ref: "Feed" }],
   request: { type: mongoose.Schema.Types.ObjectId, ref: "Request" },
-  createdAt: { type: Date, default: Date.now },
+  createdAt: { type: Date, default: date },
   chat: {
     chatting: {
       type: mongoose.Schema.Types.ObjectId,

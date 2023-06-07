@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import { useEffect, useState } from "react";
 import { AiOutlineMenu, AiFillPicture } from "react-icons/ai";
+import { FaUser } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import ChatLeft from "./ChatLeft";
 import ChatRight from "./ChatRight";
@@ -11,6 +12,8 @@ import ChatSubmitCreator from "./ChatSubmitCreator";
 import OverlayMenu from "./OverlayMenu";
 import PremiumContent from "./Chat/PremiumContent";
 import ChatMedia from "./ChatMedia";
+import { useRecoilValue } from "recoil";
+import { loginState } from "../atoms/atoms";
 const ChatContainer = styled.div`
   width: 70%;
   height: 100%;
@@ -48,6 +51,11 @@ const ChatTitle = styled.div`
         width: 100%;
         height: 100%;
         border-radius: 100%;
+      }
+      svg {
+        color: white;
+        width: 1.7vw;
+        height: 1.7vw;
       }
     }
     span {
@@ -133,6 +141,7 @@ const OverlayBox = styled(motion.div)`
     align-items: center;
     padding-bottom: 0.5vw;
     transition: all 0.1s ease-in-out;
+    padding: 0.5vw;
     span,
     svg {
       color: white;
@@ -178,6 +187,7 @@ function ChatMain() {
     null | "premium" | "menu" | "media"
   >(null);
   const [showOverlay, setShowOverlay] = useState<null | JSX.Element>(null);
+  const userLoginState = useRecoilValue(loginState);
   useEffect(() => {
     if (currentMenu === null) {
       setShowOverlay(null);
@@ -197,13 +207,16 @@ function ChatMain() {
       <ChatContainer>
         <ChatTitle>
           <div>
-            <div>
-              <img
-                src="https://image.ytn.co.kr/general/jpg/2023/0118/202301181308466432_d.jpg"
-                alt="chat profile image"
-              />
-            </div>
-            <span>소풍간 아랑이</span>
+            {userLoginState.profileImg ? (
+              <div>
+                <img src={userLoginState.profileImg} alt="chat profile image" />
+              </div>
+            ) : (
+              <div>
+                <FaUser />
+              </div>
+            )}
+            <span>{userLoginState.username}</span>
           </div>
           <AiFillPicture
             onClick={() => setCurrentMenu("media")}
@@ -221,8 +234,11 @@ function ChatMain() {
           <ChatRight />
           <ChatRightImage />
         </ChatingBox>
-        {/* <ChatSubmitUser /> */}
-        <ChatSubmitCreator setCurrentMenu={setCurrentMenu} />
+        {userLoginState.userType === "creator" ? (
+          <ChatSubmitCreator setCurrentMenu={setCurrentMenu} />
+        ) : (
+          <ChatSubmitUser />
+        )}
       </ChatContainer>
       <AnimatePresence>
         {showOverlay ? (

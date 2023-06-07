@@ -9,6 +9,7 @@ import {
   postPasswordFind,
   postUserFind,
   postFindAndChange,
+  postJoinVerifyEmail,
 } from "../controllers/globalController.js";
 import aws from "aws-sdk";
 import multer from "multer";
@@ -46,4 +47,5 @@ globalRouter.route("/userLogout").post(userLogout);
 globalRouter.route("/password-find").post(postPasswordFind);
 globalRouter.route("/user-find").post(postUserFind);
 globalRouter.route("/find-and-change").post(postFindAndChange);
+globalRouter.route("/join-verify-email").post(postJoinVerifyEmail);
 export default globalRouter;

@@ -1,11 +1,12 @@
 import { jwtConfig } from "../configs/jwtConfig.js";
 import jwt from "jsonwebtoken";
-import NobleCoin from "../models/NobleCoin.js";
 import bcrypt from "bcrypt";
+import NobleCoin from "../models/NobleCoin.js";
 import User from "../models/User.js";
 import Creator from "../models/Creator.js";
 import aws from "aws-sdk";
 import { awsImageUploadConfig } from "../configs/awsConfig.js";
+import Alarm from "../models/Alarm.js";
 
 aws.config.update({ ...awsImageUploadConfig });
 const s3 = new aws.S3();
@@ -184,5 +185,161 @@ export const postChagePassword = async (req, res) => {
     return res
       .status(404)
       .json({ message: "비밀번호를 변경하는데 문제가 발생했습니다" });
+  }
+};
+
+export const getAlarmsState = async (req, res) => {
+  try {
+    const { token } = req.cookies;
+    const { secretKey } = jwtConfig;
+    const userInfo = jwt.verify(token, secretKey);
+    const { id } = userInfo;
+
+    const user = await User.findById(id);
+    const creator = await Creator.findById(id);
+    if (!user && !creator) {
+      throw new Error("알람을 업데이트하는 과정에서 사용자를 찾을 수 없습니다");
+    }
+    if (user) {
+      const alarms = {
+        isNewAlarm: user.isNewAlarm,
+        isNewMessage: user.isNewMessage,
+      };
+      return res.status(200).json({ alarms });
+    }
+    if (creator) {
+      const alarms = {
+        isNewAlarm: creator.isNewAlarm,
+        isNewMessage: creator.isNewMessage,
+      };
+      return res.status(200).json({ alarms });
+    }
+    throw new Error("알람을 갱신하는데 문제가 발생했습니다");
+  } catch (error) {
+    return res.status(404).json({ message: error.message });
+  }
+};
+
+export const postAlarmClick = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+    if (user) {
+      user.isNewAlarm = false;
+      await user.save();
+      return res.status(200).send();
+    }
+    if (!user) {
+      const creator = await Creator.findOne({ email });
+      creator.isNewAlarm = false;
+      await creator.save();
+      return res.status(200).send();
+    }
+    throw new Error("알람 상태를 갱신하는데 문제가 발생했습니다");
+  } catch (error) {
+    return res.status(404).json({ message: error.message });
+  }
+};
+export const postMessageClick = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+    if (user) {
+      user.isNewMessage = false;
+      await user.save();
+      return res.status(200).send();
+    }
+    if (!user) {
+      const creator = await Creator.findOne({ email });
+      creator.isNewMessage = false;
+      await creator.save();
+      return res.status(200).send();
+    }
+    throw new Error("알람 상태를 갱신하는데 문제가 발생했습니다");
+  } catch (error) {
+    return res.status(404).json({ message: error.message });
+  }
+};
+export const getAlarms = async (req, res) => {
+  try {
+    const { token } = req.cookies;
+    const { secretKey } = jwtConfig;
+    const userInfo = jwt.verify(token, secretKey);
+    const { id } = userInfo;
+    const user = await User.findById(id).populate("alarms");
+    if (user) {
+      const { alarms } = user;
+      return res.status(200).json({ alarms });
+    }
+    if (!user) {
+      const creator = await Creator.findById(id).populate("alarms");
+      const { alarms } = creator;
+      return res.status(200).json({ alarms });
+    }
+    throw new Error("알람을 갱신하는데 문제가 발생했습니다");
+  } catch (error) {
+    return res.status(404).json({ message: error.message });
+  }
+};
+export const deleteAlarm = async (req, res) => {
+  const { deleteId, owner } = req.body;
+  try {
+    const alarm = await Alarm.findOneAndUpdate(
+      { owner },
+      { $pull: { alarms: { _id: deleteId } } }
+    );
+    console.log(alarm);
+    return res.status(200).send();
+  } catch (error) {
+    return res.status(404).send();
+  }
+
+  // const alarm = await Alarm.findOne({ alarms });
+};
+export const getPersonalScreenUserData = async (req, res) => {
+  try {
+    const { userId: paramsUserId } = req.query;
+    const creator = await Creator.findOne({ userId: paramsUserId });
+    if (creator) {
+      const {
+        userId,
+        profileImg,
+        backGroundImg,
+        profileDescription,
+        follower,
+        username,
+        membershipPlan,
+      } = creator;
+      return res.status(200).json({
+        userId,
+        profileImg,
+        backGroundImg,
+        profileDescription,
+        follower,
+        username,
+        membershipPlan,
+      });
+    }
+    if (!creator) {
+      const user = await User.findOne({ userId: paramsUserId });
+      console.log(user);
+      const {
+        userId,
+        profileImg,
+        backGroundImg,
+        profileDescription,
+        follower,
+      } = user;
+      return res.status(200).json({
+        userId,
+        profileImg,
+        backGroundImg,
+        profileDescription,
+        follower,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(404).json({ messasge: error.message });
   }
 };

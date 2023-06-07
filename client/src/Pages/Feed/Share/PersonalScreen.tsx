@@ -1,16 +1,19 @@
 import { useEffect, useState } from "react";
-import { Link, useMatch } from "react-router-dom";
+import { Link, useLocation, useMatch, useNavigate } from "react-router-dom";
 import { Outlet } from "react-router-dom";
 import styled from "styled-components";
 import { BsCheck } from "react-icons/bs";
 import { motion, AnimatePresence } from "framer-motion";
 import MembershipTap from "../../../Components/MembershipTap";
-import { subscribe } from "diagnostics_channel";
-import { useRecoilState } from "recoil";
-import { userFeedLayout } from "../../../atoms/atoms";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { loginState, userFeedLayout } from "../../../atoms/atoms";
 import CreateFeed from "../Creator/CreateFeed";
 import RequestionOverlay from "../Creator/RequestionOverlay";
 import ResponseToReq from "../Creator/ResponseToReq";
+import { FaHandPointRight, FaUser } from "react-icons/fa";
+import { useQuery } from "@tanstack/react-query";
+import { getPersonalScreenUserData } from "../../../api/user/creatorApi";
+import LoadingOverlay from "../../../Components/LoadingOverlay";
 const Wrapper = styled.div`
   width: 80%;
   padding-left: 2vw;
@@ -39,6 +42,16 @@ const UserProfileImageBox = styled.div`
     border-top-left-radius: 20px;
     display: flex;
     overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    span {
+      font-size: 1.3vw;
+      color: rgba(255, 255, 255, 0.5);
+      &:hover {
+        cursor: pointer;
+      }
+    }
     img {
       width: 100%;
       height: 100%;
@@ -55,6 +68,17 @@ const UserProfileImageBox = styled.div`
     border-radius: 100%;
     outline: 3px solid white;
     overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    svg {
+      color: rgba(255, 255, 255, 0.5);
+      width: 3.5vw;
+      height: 3.5vw;
+      &:hover {
+        cursor: pointer;
+      }
+    }
     img {
       object-fit: cover;
       width: 100%;
@@ -151,6 +175,7 @@ const UserInfomationBox = styled.div<MetaProps>`
     align-items: center;
     height: auto;
     p {
+      width: 100%;
       padding: 1vw;
       white-space: pre-wrap;
       font-size: 1.2vw;
@@ -222,6 +247,34 @@ const SubscribeBox = styled.div`
   height: auto;
   padding: 0 2vw;
   margin-bottom: 2vw;
+  div {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    small {
+      padding: 1vw 0;
+      border-radius: 10px;
+      border: 1px solid ${(props) => props.theme.accentColor};
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: ${(props) => props.theme.accentColor};
+      font-size: 1.4vw;
+      font-weight: 600;
+      transition: all 0.1s ease-in-out;
+      svg {
+        margin-left: 0.5vw;
+        width: 2vw;
+        height: 2vw;
+      }
+      &:hover {
+        cursor: pointer;
+        background-color: white;
+      }
+    }
+  }
   button {
     width: 100%;
     padding: 1vw 2vw;
@@ -304,21 +357,23 @@ const overlayBoxVariant = {
     },
   },
 };
+interface PersonalScreenDataProps {
+  userId: string;
+  backGroundImg: string | null;
+  profileImg: string | null;
+  profileDescription: string;
+  username: string;
+  follower: [];
+  membershipPlan: [];
+}
 function PersonalScreen() {
-  const originalString = `국회는 의장 1인과 부의장 2인을 선출한다. 한 회계연도를 넘어 계속하여 지출할 필요가 있을 때에는 정부는 연한을 정하여 계속비로서 국회의 의결을 얻어야 한다.
-
-이 헌법시행 당시의 법령과 조약은 이 헌법에 위배되지 아니하는 한 그 효력을 지속한다. 대통령후보자가 1인일 때에는 그 득표수가 선거권자 총수의 3분의 1 이상이 아니면 대통령으로 당선될 수 없다.
-
-국가는 건전한 소비행위를 계도하고 생산품의 품질향상을 촉구하기 위한 소비자보호운동을 법률이 정하는 바에 의하여 보장한다. 형사피고인은 유죄의 판결이 확정될 때까지는 무죄로 추정된다.
-
-형사피의자 또는 형사피고인으로서 구금되었던 자가 법률이 정하는 불기소처분을 받거나 무죄판결을 받은 때에는 법률이 정하는 바에 의하여 국가에 정당한 보상을 청구할 수 있다.
-
-대법원과 각급법원의 조직은 법률로 정한다. 국무회의는 정부의 권한에 속하는 중요한 정책을 심의한다. 법률이 정하는 주요방위산업체에 종사하는 근로자의 단체행동권은 법률이 정하는 바에 의하여 이를 제한하거나 인정하지 아니할 수 있다.
-
-일반사면을 명하려면 국회의 동의를 얻어야 한다. 각급 선거관리위원회는 선거인명부의 작성등 선거사무와 국민투표사무에 관하여 관계 행정기관에 필요한 지시를 할 수 있다.
-
-모든 국민은 직업선택의 자유를 가진다. 공무원의 신분과 정치적 중립성은 법률이 정하는 바에 의하여 보장된다. 재의의 요구가 있을 때에는 국회는 재의에 붙이고, 재적의원과반수의 출석과 출석의원 3분의 2 이상의 찬성으로 전과 같은 의결을 하면 그 법률안은 법률로서 확정된다.
-            `;
+  const userLoginState = useRecoilValue(loginState);
+  const navigator = useNavigate();
+  const location = useLocation();
+  // 현재 방문중인 페이지가 내 페이지에 해당되는지 아닌지에 대한 검사
+  const [isMyPage, setIsMyPage] = useState(false);
+  // 유저의 path에서 userid를 저장
+  const [currentPageUserId, setCurrentPageUserId] = useState("");
   const isFeedPage = useMatch("/main/:userId/feed");
   const isRequestPage = useMatch("/main/:userId/requestion");
   const [isOverflow, setIsOverflow] = useState(false);
@@ -332,6 +387,28 @@ function PersonalScreen() {
   const [overlayComponent, setOverlayComponent] = useState<null | JSX.Element>(
     null
   );
+
+  const { data: personalScreenData, isLoading: personalDataLoading } =
+    useQuery<PersonalScreenDataProps>({
+      queryKey: ["userScreen", currentPageUserId],
+      queryFn: () => getPersonalScreenUserData(currentPageUserId),
+      staleTime: 5 * 60 * 1000,
+      cacheTime: Infinity,
+    });
+
+  // MyPage Inspect, set Current Path User Id
+  useEffect(() => {
+    if (!userLoginState.userId) {
+      return;
+    }
+    // location Pathname example
+    // /main/:useriD
+    const currentPathId = location.pathname.split("/")[2];
+    if (userLoginState.userId === currentPathId) {
+      setIsMyPage(true);
+    }
+    setCurrentPageUserId(currentPathId);
+  }, [location]);
   // Overlay Management to Recoil
   useEffect(() => {
     if (overlay === null) {
@@ -351,113 +428,157 @@ function PersonalScreen() {
     }
   }, [overlay]);
   useEffect(() => {
-    if (originalString.length > 150) {
-      setIsOverflow(true);
-      setIntroText(originalString.slice(0, 150) + "...");
-    } else {
-      setIntroText(originalString);
+    if (personalDataLoading) {
+      return;
     }
-  }, []);
+    if (!personalScreenData?.profileDescription) {
+      return;
+    }
+    if (personalScreenData.profileDescription.length > 150) {
+      setIsOverflow(true);
+      setIntroText(personalScreenData.profileDescription.slice(0, 150) + "...");
+    } else {
+      setIntroText(personalScreenData.profileDescription);
+    }
+  }, [personalScreenData, personalDataLoading]);
   const handleSeeMore = () => {
+    if (!userLoginState.profileDescription) {
+      return;
+    }
     setSeeMore((pre) => !pre);
     if (seeMore) {
-      setIntroText(originalString);
+      setIntroText(userLoginState.profileDescription);
     } else {
-      setIntroText(originalString.slice(0, 150) + "...");
+      setIntroText(userLoginState.profileDescription.slice(0, 150) + "...");
     }
   };
   return (
-    <Wrapper>
-      <UserProfileImageBox>
-        <div id="profile_background_img">
-          <img
-            src="https://i.ytimg.com/vi/LDNy2oJ22lM/maxresdefault.jpg"
-            alt=""
-          />
-        </div>
-        <div id="profile_main_img">
-          <img
-            src="https://biz.chosun.com/resizer/rz9ujfjHav8ySL_35PBUk8M5Z6c=/530x679/smart/cloudfront-ap-northeast-1.images.arcpublishing.com/chosunbiz/52DIJZRC3W77PEGSHABYQCZFCE.jpg"
-            alt=""
-          />
-        </div>
-      </UserProfileImageBox>
-      <UserInfomationBox follow={follow}>
-        <div id="user_meta_infomation">
-          <div id="user_main_info">
-            <span>user_name</span>
-            <span>@user_id</span>
-            <span>
-              URL: <span>noblefandom.co.kr/main/userid</span>
-            </span>
-          </div>
-          <div id="user_sub_info">
-            <span>팔로우 2302</span>
-            <span>포스트 23</span>
-          </div>
-        </div>
-        <div id="user_follow_btn_container">
-          <button onClick={() => setFollow((pre) => !pre)}>
-            팔로우
-            {follow ? <BsCheck /> : null}
-          </button>
-        </div>
-        <div id="user_introduce_box">
-          <p>{introText}</p>
-          {isOverflow ? (
-            <div onClick={handleSeeMore}>
-              <hr />
-              <span>{seeMore ? "더보기" : "숨기기"}</span>
-              <hr />
+    <>
+      {personalDataLoading ? null : (
+        <Wrapper>
+          <UserProfileImageBox>
+            <div id="profile_background_img">
+              {personalScreenData?.backGroundImg ? (
+                <img
+                  src={personalScreenData.backGroundImg}
+                  alt="user personal screen background image"
+                />
+              ) : isMyPage ? (
+                <span onClick={() => navigator("/main/setting/profile")}>
+                  배경 이미지 설정
+                </span>
+              ) : null}
             </div>
+            <div id="profile_main_img">
+              {personalScreenData?.profileImg ? (
+                <img
+                  src={personalScreenData.profileImg}
+                  alt="user personal screen profile image"
+                />
+              ) : isMyPage ? (
+                <FaUser onClick={() => navigator("/main/setting/profile")} />
+              ) : null}
+            </div>
+          </UserProfileImageBox>
+          <UserInfomationBox follow={follow}>
+            <div id="user_meta_infomation">
+              <div id="user_main_info">
+                <span>{personalScreenData?.username}</span>
+                <span>{`@${userLoginState?.userId}`}</span>
+                <span>
+                  URL:{" "}
+                  <span>{`noblefandom.co.kr/main/${userLoginState.userId}`}</span>
+                </span>
+              </div>
+              <div id="user_sub_info">
+                <span>팔로우 2302</span>
+                <span>포스트 23</span>
+              </div>
+            </div>
+            <div id="user_follow_btn_container">
+              <button onClick={() => setFollow((pre) => !pre)}>
+                팔로우
+                {follow ? <BsCheck /> : null}
+              </button>
+            </div>
+            <div id="user_introduce_box">
+              <p>{introText}</p>
+              {isOverflow ? (
+                <div onClick={handleSeeMore}>
+                  <hr />
+                  <span>{seeMore ? "더보기" : "숨기기"}</span>
+                  <hr />
+                </div>
+              ) : null}
+            </div>
+          </UserInfomationBox>
+          {userLoginState.userType === "creator" ? (
+            personalScreenData?.membershipPlan.length === 0 ? (
+              <SubscribeBox>
+                <div>
+                  <small
+                    onClick={() =>
+                      navigator("/main/creator-setting/membership")
+                    }
+                  >
+                    맴버쉽 플랜 설정하기 <FaHandPointRight />
+                  </small>
+                </div>
+              </SubscribeBox>
+            ) : (
+              <SubscribeBox>
+                <button onClick={() => setOverlay("subscribe")}>
+                  <span>구독하기</span>
+                  <span>₩70,000 / 월</span>
+                </button>
+              </SubscribeBox>
+            )
           ) : null}
-        </div>
-      </UserInfomationBox>
-      <SubscribeBox>
-        <button onClick={() => setOverlay("subscribe")}>
-          <span>구독하기</span>
-          <span>₩70,000 / 월</span>
-        </button>
-      </SubscribeBox>
-      {/* Creator Part */}
-      <UserNavigationBox
-        isFeedPage={
-          isFeedPage !== null || (isFeedPage === null && isRequestPage === null)
-        }
-        isRequestionPage={isRequestPage !== null}
-      >
-        <ul>
-          <Link to="feed">
-            <li>피드</li>
-          </Link>
-          <Link to="requestion">
-            <li>유저 리퀘스트</li>
-          </Link>
-        </ul>
-      </UserNavigationBox>
-      <Outlet />
-      {overlay ? (
-        <AnimatePresence>
-          <Overlay
-            onClick={() => setOverlay(null)}
-            variants={overlayVariant}
-            initial="start"
-            animate="end"
-            exit="exit"
+          {/* Creator Part */}
+          <UserNavigationBox
+            isFeedPage={
+              isFeedPage !== null ||
+              (isFeedPage === null && isRequestPage === null)
+            }
+            isRequestionPage={isRequestPage !== null}
           >
-            <OverlayBox
-              onClick={(event) => event.stopPropagation()}
-              variants={overlayBoxVariant}
-              initial="start"
-              animate="end"
-              exit="exit"
-            >
-              {overlayComponent}
-            </OverlayBox>
-          </Overlay>
-        </AnimatePresence>
+            <ul>
+              <Link to="feed">
+                <li>피드</li>
+              </Link>
+              <Link to="requestion">
+                <li>유저 리퀘스트</li>
+              </Link>
+            </ul>
+          </UserNavigationBox>
+          <Outlet />
+          {overlay ? (
+            <AnimatePresence>
+              <Overlay
+                onClick={() => setOverlay(null)}
+                variants={overlayVariant}
+                initial="start"
+                animate="end"
+                exit="exit"
+              >
+                <OverlayBox
+                  onClick={(event) => event.stopPropagation()}
+                  variants={overlayBoxVariant}
+                  initial="start"
+                  animate="end"
+                  exit="exit"
+                >
+                  {overlayComponent}
+                </OverlayBox>
+              </Overlay>
+            </AnimatePresence>
+          ) : null}
+        </Wrapper>
+      )}
+      {personalDataLoading ? (
+        <LoadingOverlay isLoading={personalDataLoading} />
       ) : null}
-    </Wrapper>
+    </>
   );
 }
 

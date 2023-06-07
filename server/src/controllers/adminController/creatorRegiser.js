@@ -4,10 +4,12 @@ import Creator from "../../models/Creator.js";
 import NobleCoin from "../../models/NobleCoin.js";
 import Request from "../../models/Request.js";
 import Alarm from "../../models/Alarm.js";
-
+import MessageSetting from "../../models/MessageSetting.js";
 const adminMakeAlarm = async (owner, content) => {
   try {
     const alarm = await Alarm.findOne({ owner });
+    const date = new Date();
+    date.setHours(date.getHours() + 9);
     if (alarm) {
       const data = {
         sender: {
@@ -16,7 +18,7 @@ const adminMakeAlarm = async (owner, content) => {
             "https://cdn.icon-icons.com/icons2/37/PNG/512/administrator_3552.png",
         },
         content,
-        createdAt: Date.now(),
+        createdAt: date,
       };
       alarm.alarms.push(data);
       await alarm.save();
@@ -33,7 +35,7 @@ const adminMakeAlarm = async (owner, content) => {
           "https://cdn.icon-icons.com/icons2/37/PNG/512/administrator_3552.png",
       },
       content,
-      createdAt: Date.now(),
+      createdAt: date,
     };
     newAlarm.alarms.push(data);
     await newAlarm.save();
@@ -56,10 +58,8 @@ export const getRegister = async (req, res) => {
 
 export const postApprove = async (req, res) => {
   const { owner } = req.body;
-  console.log(owner);
   try {
     const user = await User.findById(owner).populate(["nobleCoin"]);
-    console.log(user);
     // user가 없는경우
     if (!user) {
       return res
@@ -83,7 +83,6 @@ export const postApprove = async (req, res) => {
       paidCardInfo: user.paidCardInfo,
       follower: user.follower,
       likedFeed: user.likedFeed,
-      // TODO 알람의 owner 수정
     });
 
     // User -> Creator 전환 시 유저가 가지고 있던 코인 -> 크리에이터 코인으로 바꿔준다
@@ -94,10 +93,17 @@ export const postApprove = async (req, res) => {
     });
     creator.nobleCoin = creatorNobleCoin;
 
+    // 크리에이터 Message Setting을 만들고  저장
+    const messageSetting = await MessageSetting.create({
+      owner: creator._id,
+    });
+    creator.messageSetting = messageSetting;
+
     // Alarms 내용 User -> Creator
-    const newAlarm = user.alarms;
+    const newAlarm = await Alarm.findById(user.alarms);
     newAlarm.owner = creator._id;
-    creator.alarms = newAlarm;
+    creator.alarms = newAlarm._id;
+    await newAlarm.save();
     await adminMakeAlarm(
       creator._id,
       "축하합니다 크리에이터에 승인되었습니다!"

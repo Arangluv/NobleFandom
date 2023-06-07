@@ -18,6 +18,13 @@ interface UserFindPasswordAndChange {
   email: string;
   changePassword: string;
 }
+interface UserAlaramClickProp {
+  email: string;
+}
+interface DeleteAlarmProps {
+  deleteId: string;
+  owner: string;
+}
 export const userTokenInspect = async () => {
   return await axios
     .get(`${BASE_URL}/token-inspect`, {
@@ -44,6 +51,13 @@ export const getCoinValue = async () => {
     .then((result) => result.data);
 };
 
+export const getAlarmsState = async () => {
+  return await axios
+    .get(`${BASE_URL}/users/alarms-state`, {
+      withCredentials: true,
+    })
+    .then((result) => result.data);
+};
 export const postEditProfile = async (
   formData: FormData
 ): Promise<AxiosResponse<UserInfoResponse>> => {
@@ -75,5 +89,40 @@ export const postPasswordFindAndChange = async (
     method: "POST",
     withCredentials: true,
     data,
+  });
+};
+
+export const postAlarmsClick = async (email: UserAlaramClickProp) => {
+  return await axios({
+    url: `${BASE_URL}/users/alram-click`,
+    method: "POST",
+    data: email,
+  });
+};
+export const postMessageClick = async (email: UserAlaramClickProp) => {
+  return await axios({
+    url: `${BASE_URL}/users/message-click`,
+    method: "POST",
+    data: email,
+  });
+};
+export const getAlarms = async () => {
+  return await axios({
+    url: `${BASE_URL}/users/get-alarms`,
+    method: "GET",
+    withCredentials: true,
+  })
+    .then((result) => result.data)
+    .catch((error) => error.message);
+};
+
+export const postAlarmDelete = async ({
+  deleteId,
+  owner,
+}: DeleteAlarmProps) => {
+  return await axios({
+    url: `${BASE_URL}/users/delete-alarm`,
+    method: "POST",
+    data: { deleteId, owner },
   });
 };

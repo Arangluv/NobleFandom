@@ -486,8 +486,8 @@ function RegisterCreator() {
         data: formData,
         withCredentials: true,
       });
-      navigator("/", { replace: true });
       setLoading(false);
+      window.location.replace("/");
     } catch (error: any) {
       console.log(error?.response?.data?.message);
       setError("extraError", {

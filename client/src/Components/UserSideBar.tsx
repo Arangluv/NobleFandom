@@ -1,20 +1,28 @@
 import styled from "styled-components";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 // SideBar
 import {
   AiOutlineHome,
   AiOutlineBell,
   AiOutlineMessage,
   AiFillHeart,
+  AiFillExclamationCircle,
 } from "react-icons/ai";
-import { RiVipDiamondLine, RiVipLine } from "react-icons/ri";
+import { WiMoonAltNew } from "react-icons/wi";
+import { RiVipDiamondLine } from "react-icons/ri";
 import { BsFillGearFill, BsSearch } from "react-icons/bs";
 import { FaUser } from "react-icons/fa";
 import { GiCrownCoin } from "react-icons/gi";
 import { useRecoilValue } from "recoil";
 import { loginState } from "../atoms/atoms";
-import { getCoinValue } from "../api/user/usesApi";
-import { useQuery } from "@tanstack/react-query";
+import {
+  getAlarmsState,
+  getCoinValue,
+  postAlarmsClick,
+  postMessageClick,
+} from "../api/user/usesApi";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 // Side Bar
 const SideBarContainer = styled.div`
@@ -111,6 +119,18 @@ const SubBarContainer = styled.div`
     margin-top: 1vw;
     display: flex;
     flex-direction: column;
+    #alarm_container,
+    #message_container {
+      position: relative;
+      #exclamation_mark {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        left: 2vw;
+        top: 0.5vw;
+        color: ${(props) => props.theme.textRedColor};
+      }
+    }
     li {
       display: flex;
       align-items: center;
@@ -195,14 +215,28 @@ const SubBarContainer = styled.div`
 interface CProps {
   coinQuantity: string;
 }
+interface AProps {
+  alarms: {
+    isNewAlarm: boolean;
+    isNewMessage: boolean;
+  };
+}
 function UserSideBar() {
   const userLoginStste = useRecoilValue(loginState);
-  const {
-    isLoading,
-    data: coin,
-    error,
-    isError,
-  } = useQuery<CProps | undefined>({
+  const navigator = useNavigate();
+  const { isLoading: alarmsLoading, data: alarms } = useQuery<
+    AProps | undefined
+  >({
+    queryKey: ["newAlarms"],
+    queryFn: getAlarmsState,
+    staleTime: 1000 * 60 * 5,
+    cacheTime: Infinity,
+    meta: {
+      message: "알람상태를 업데이트 하는데 실패했습니다",
+    },
+  });
+
+  const { isLoading, data: coin } = useQuery<CProps | undefined>({
     queryKey: ["nobleCoinValue"],
     queryFn: getCoinValue,
     staleTime: 1000 * 60 * 5,
@@ -211,6 +245,51 @@ function UserSideBar() {
       message: "코인을 받아오는데 실패했습니다",
     },
   });
+  const queryClient = useQueryClient();
+  const { mutate: alarmsMutate } = useMutation({
+    mutationFn: postAlarmsClick,
+    onSuccess: () => {
+      return queryClient.invalidateQueries({
+        queryKey: ["newAlarms"],
+      });
+    },
+    onError: () => {
+      toast.error("알람상태를 변경하는데 실패했습니다.");
+      console.log("실패");
+    },
+  });
+  const { mutate: messageMutate } = useMutation({
+    mutationFn: postMessageClick,
+    onSuccess: () => {
+      return queryClient.invalidateQueries({
+        queryKey: ["newAlarms"],
+      });
+    },
+    onError: () => {
+      toast.error("메세지의 상태를 변경하는데 실패했습니다");
+      console.log("실패");
+    },
+  });
+  const handleAlarmClick = () => {
+    if (!userLoginStste.email) {
+      return;
+    }
+    if (!alarms?.alarms.isNewAlarm) {
+      return;
+    }
+    const email = userLoginStste.email;
+    alarmsMutate({ email });
+  };
+  const handleMessageClick = () => {
+    if (!userLoginStste.email) {
+      return;
+    }
+    if (!alarms?.alarms.isNewMessage) {
+      return;
+    }
+    const email = userLoginStste.email;
+    messageMutate({ email });
+  };
   return (
     <SideBarContainer>
       <h1>
@@ -218,7 +297,10 @@ function UserSideBar() {
       </h1>
       <SubBarContainer>
         {/* 만약 프로필사진이 있으면 다른 경우로 만들어줘야함 ex. border none .. */}
-        <div id="user_container">
+        <div
+          id="user_container"
+          onClick={() => navigator(`${userLoginStste.userId}`)}
+        >
           <div id="profile_box">
             <div id="profile_box_border">
               {userLoginStste.profileImg ? (
@@ -243,8 +325,11 @@ function UserSideBar() {
             </li>
           </Link>
           <Link to="alarm">
-            <li>
+            <li id="alarm_container" onClick={handleAlarmClick}>
               <AiOutlineBell />
+              {alarms?.alarms.isNewAlarm ? (
+                <WiMoonAltNew id="exclamation_mark" />
+              ) : null}
               <span>알림</span>
             </li>
           </Link>
@@ -255,8 +340,11 @@ function UserSideBar() {
             </li>
           </Link>
           <Link to="chat">
-            <li>
+            <li id="message_container" onClick={handleMessageClick}>
               <AiOutlineMessage />
+              {alarms?.alarms?.isNewMessage ? (
+                <WiMoonAltNew id="exclamation_mark" />
+              ) : null}
               <span>메시지</span>
             </li>
           </Link>

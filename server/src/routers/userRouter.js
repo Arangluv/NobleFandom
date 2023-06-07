@@ -3,6 +3,12 @@ import {
   getCoinValue,
   postEditProfile,
   postChagePassword,
+  getAlarmsState,
+  postAlarmClick,
+  getAlarms,
+  deleteAlarm,
+  getPersonalScreenUserData,
+  postMessageClick,
 } from "../controllers/userController.js";
 import aws from "aws-sdk";
 import multer from "multer";
@@ -40,4 +46,10 @@ userRouter
   );
 
 userRouter.route("/change-password").post(postChagePassword);
+userRouter.route("/alarms-state").get(getAlarmsState);
+userRouter.route("/alram-click").post(postAlarmClick);
+userRouter.route("/message-click").post(postMessageClick);
+userRouter.route("/get-alarms").get(getAlarms);
+userRouter.route("/delete-alarm").post(deleteAlarm);
+userRouter.route("/get-personalscreen-userdata").get(getPersonalScreenUserData);
 export default userRouter;

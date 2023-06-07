@@ -1,6 +1,5 @@
 import styled from "styled-components";
 import { RiMailSendLine } from "react-icons/ri";
-import { BsCardImage } from "react-icons/bs";
 import { SlPresent } from "react-icons/sl";
 const ChatSubmitForm = styled.form`
   width: 100%;

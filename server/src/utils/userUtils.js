@@ -52,6 +52,8 @@ export const createUser = async (email, username, password, userId) => {
       owner: _id,
       alrams: [],
     });
+    const date = new Date();
+    date.setHours(date.getHours() + 9);
     const data = {
       sender: {
         userId: "noblefandom_official",
@@ -59,7 +61,7 @@ export const createUser = async (email, username, password, userId) => {
           "https://cdn.icon-icons.com/icons2/37/PNG/512/administrator_3552.png",
       },
       content: "가입을 환영합니다",
-      createdAt: Date.now(),
+      createdAt: date,
     };
     alarms.alarms.push(data);
     alarms.save();

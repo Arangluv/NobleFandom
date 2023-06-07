@@ -9,6 +9,7 @@ import uuid from "react-uuid";
 import axios from "axios";
 import { loginState } from "../../atoms/atoms";
 import { useRecoilState } from "recoil";
+import { toast } from "react-toastify";
 const Wrapper = styled.div`
   height: 250vh;
   width: 100%;
@@ -33,6 +34,15 @@ const SubWrapper = styled.div`
 `;
 const JoinForm = styled.form`
   width: 80%;
+  #extra_error_message {
+    display: flex;
+    justify-content: center;
+    color: ${(props) => props.theme.textRedColor};
+    text-align: center;
+    font-size: 1vw;
+    margin-top: 1vw;
+    width: 100%;
+  }
   #terms_agree_notice {
     width: 100%;
     display: flex;
@@ -51,20 +61,40 @@ const EmailLabel = styled.label`
   text-shadow: ${(props) => props.theme.textShadow};
   display: flex;
   flex-direction: column;
-  input[type="text"] {
-    color: white;
-    width: 60%;
+  div {
+    display: flex;
+    align-items: center;
     margin-top: 0.5vw;
-    padding: 0.8vw 1vw;
-    border: 1px solid white;
-    background-color: black;
-    border-radius: 10px;
-    box-shadow: ${(props) => props.theme.textShadow};
+    input[type="text"] {
+      color: white;
+      width: 60%;
+      padding: 0.8vw 1vw;
+      border: 1px solid white;
+      background-color: black;
+      border-top-left-radius: 10px;
+      border-bottom-left-radius: 10px;
+      box-shadow: ${(props) => props.theme.textShadow};
+      height: 40px;
+    }
+    button {
+      height: 40px;
+      background-color: ${(props) => props.theme.verifyColor};
+      border-top-right-radius: 10px;
+      border-bottom-right-radius: 10px;
+      padding: 0.8vw 2vw;
+      color: white;
+      border: 1px solid white;
+      box-shadow: ${(props) => props.theme.textShadow};
+      &:hover {
+        cursor: pointer;
+      }
+    }
+    input[type="text"]:focus {
+      outline: none;
+      border-color: ${(props) => props.theme.accentColor};
+    }
   }
-  input[type="text"]:focus {
-    outline: none;
-    border-color: ${(props) => props.theme.accentColor};
-  }
+
   span {
     display: flex;
     align-items: center;
@@ -74,6 +104,61 @@ const EmailLabel = styled.label`
       font-weight: 600;
       margin-left: 1vw;
       text-shadow: none;
+    }
+  }
+`;
+const EmailValidationLabel = styled.label`
+  display: flex;
+  margin-top: 1vw;
+  flex-direction: column;
+
+  #validation_notice {
+    color: ${(props) => props.theme.accentColor};
+    font-size: 1vw;
+    margin-bottom: 1vw;
+  }
+  div {
+    display: flex;
+    align-items: center;
+    input[type="number"],
+    button {
+      height: 40px;
+      border: 1px solid white;
+      background-color: black;
+      color: white;
+      text-shadow: ${(props) => props.theme.textShadow};
+    }
+    button {
+      padding: 0 2vw;
+      border-top-right-radius: 10px;
+      border-bottom-right-radius: 10px;
+      background-color: ${(props) => props.theme.verifyColor};
+      &:hover {
+        cursor: pointer;
+      }
+    }
+    input[type="number"] {
+      width: 40%;
+      text-align: center;
+      border-top-left-radius: 10px;
+      border-bottom-left-radius: 10px;
+      &:focus {
+        outline: none;
+      }
+    }
+    input[type="number"]::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+      text-shadow: none;
+    }
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    small {
+      font-size: 1.1vw;
+      color: ${(props) => props.theme.textRedColor};
+      margin-left: 1vw;
     }
   }
 `;
@@ -222,17 +307,22 @@ interface IForm {
   passwordConfirm: string;
   phoneVerify: boolean;
   terms: boolean;
-
+  verifyNum: number;
   extraError?: string;
   // terms?: string; 필수가 아닌경우 저렇게 물음표를 붙인다.
 }
+
 function UserJoin() {
   const [termsCheck, setTermsCheck] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
-  const { register, handleSubmit, formState, setError } = useForm<IForm>();
+  const { register, handleSubmit, formState, setError, watch, clearErrors } =
+    useForm<IForm>();
   const navigator = useNavigate();
   const [userLoginState, setUserLoginState] = useRecoilState(loginState);
+  const [verifyClick, setVerifyClick] = useState(false);
+  const [emailValidation, setEmailValidation] = useState(false);
+  const [authNumber, setAuthNumber] = useState<null | Number>(null);
   const onValid = async (data: IForm) => {
     setLoading(true);
     if (data.password !== data.passwordConfirm) {
@@ -241,6 +331,13 @@ function UserJoin() {
         { message: "비밀번호가 다릅니다" },
         { shouldFocus: true }
       );
+      setLoading(false);
+      return;
+    }
+    if (!emailValidation) {
+      setError("extraError", {
+        message: "이메일 인증은 필수 입니다",
+      });
       setLoading(false);
       return;
     }
@@ -264,7 +361,7 @@ function UserJoin() {
         backGroundImg: result.data.backGroundImg,
         email: result.data.email,
         profileDescription: result.data.profileDescription,
-        socialOnly: result.data.socialOnly
+        socialOnly: result.data.socialOnly,
       };
       setUserLoginState({ ...newLoginState });
       setLoading(false);
@@ -275,7 +372,8 @@ function UserJoin() {
       setLoading(false);
     }
   };
-
+  console.log(formState.errors);
+  console.log(watch());
   // Invalid Access Check
   useEffect(() => {
     if (userLoginState.userType === "") {
@@ -283,6 +381,51 @@ function UserJoin() {
     }
     navigator("/main", { replace: true });
   }, []);
+  const handleVerifyEmailClick = async (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    event.preventDefault();
+    clearErrors("extraError");
+    const emailTest = /^[a-zA-Z0-9+-\_.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
+    if (emailTest.test(watch("email"))) {
+      clearErrors("email");
+      setVerifyClick(true);
+      const randomNumber = Math.floor(Math.random() * 888888) + 111111;
+      setAuthNumber(randomNumber);
+      await axios
+        .post(`${BASE_URL}/join-verify-email`, {
+          authNumber: randomNumber,
+          email: "12123",
+        })
+        .then(() => {
+          toast.success("메일을 성공적으로 보냈습니다!");
+        })
+        .catch(() => {
+          toast.error("메일을 보내는데 문제가 발생했습니다.");
+        });
+      return;
+    }
+    setError("email", {
+      message: "이메일 형식이 아닙니다",
+    });
+  };
+
+  const handleVerifyClick = (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    event.preventDefault();
+    clearErrors("extraError");
+    if (Number(watch("verifyNum")) !== authNumber) {
+      setError("verifyNum", {
+        message: "인증에 실패했습니다",
+      });
+      toast.error("인증에 실패했습니다");
+      return;
+    }
+    clearErrors("verifyNum");
+    setEmailValidation(true);
+    toast.success("인증에 성공했습니다!");
+  };
   return (
     <Wrapper>
       <SideBar />
@@ -296,18 +439,45 @@ function UserJoin() {
                 <small>{formState?.errors.email?.message}</small>
               ) : null}
             </span>
-            <input
-              {...register("email", {
-                required: "이메일을 입력해주세요",
-                pattern: {
-                  value: /^[a-zA-Z0-9+-\_.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/,
-                  message: "이메일 형식이어야 합니다",
-                },
-              })}
-              type="text"
-              placeholder="이메일"
-            />
+            <div>
+              <input
+                {...register("email", {
+                  required: "이메일을 입력해주세요",
+                  pattern: {
+                    value: /^[a-zA-Z0-9+-\_.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/,
+                    message: "이메일 형식이어야 합니다",
+                  },
+                })}
+                readOnly={emailValidation}
+                type="text"
+                placeholder="이메일"
+              />
+              <button disabled={verifyClick} onClick={handleVerifyEmailClick}>
+                인증번호 받기
+              </button>
+            </div>
           </EmailLabel>
+          {verifyClick ? (
+            <EmailValidationLabel>
+              <span id="validation_notice">
+                인증번호를 입력하신 메일로 보냈습니다. 확인 후 입력란에
+                입력해주시고 인증버튼을 눌러주세요
+              </span>
+              <div>
+                <input
+                  {...register("verifyNum")}
+                  type="number"
+                  placeholder="인증번호를 입력해주세요"
+                />
+                <button disabled={emailValidation} onClick={handleVerifyClick}>
+                  인증
+                </button>
+                {formState?.errors.verifyNum ? (
+                  <small>{formState.errors.verifyNum.message}</small>
+                ) : null}
+              </div>
+            </EmailValidationLabel>
+          ) : null}
           <UsernameLabel>
             <span>
               닉네임
@@ -389,6 +559,11 @@ function UserJoin() {
             <ErrorMsgBox>
               <span>{errorMsg}</span>
             </ErrorMsgBox>
+          ) : null}
+          {formState?.errors?.extraError ? (
+            <small id="extra_error_message">
+              {formState.errors.extraError.message}
+            </small>
           ) : null}
           <SubmitLabel>
             <span>회원가입</span>
