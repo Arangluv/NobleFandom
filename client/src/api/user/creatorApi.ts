@@ -8,6 +8,20 @@ interface MessageSettingProps {
   extraError?: string;
   _id: string;
 }
+interface PlanDataProps {
+  benefits_period: string | null;
+  benefits_msg: string | null;
+  benefits_request: string | null;
+  membershipDescription: string;
+  membershipName: string;
+  membership_price: number;
+  paid_message_value?: number;
+}
+interface ModifyPlanProps {
+  planName: string;
+  planContent: string;
+  planId: string;
+}
 export const getMessageSetting = async () => {
   return await axios({
     url: `${BASE_URL}/creators/get-messagesetting`,
@@ -36,4 +50,32 @@ export const getPersonalScreenUserData = async (userId: string) => {
   })
     .then((result) => result.data)
     .catch((error) => error.response.data);
+};
+
+export const postAddMembershipPlan = async (plan: PlanDataProps) => {
+  return await axios({
+    url: `${BASE_URL}/creators/add-membership-plan`,
+    method: "POST",
+    data: plan,
+    withCredentials: true,
+  });
+};
+
+export const getMembershipPlan = async () => {
+  return await axios({
+    url: `${BASE_URL}/creators/get-plandata`,
+    method: "GET",
+    withCredentials: true,
+  })
+    .then((result) => result.data.data)
+    .catch((error: any) => error.response.data);
+};
+
+export const postEditMembershipPlan = async (modifiedPlan: ModifyPlanProps) => {
+  return await axios({
+    url: `${BASE_URL}/creators/modify-plan`,
+    method: "POST",
+    data: modifiedPlan,
+    withCredentials: true,
+  });
 };

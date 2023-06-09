@@ -2,10 +2,19 @@ import styled from "styled-components";
 import { FiAlertCircle } from "react-icons/fi";
 import { AiOutlinePlus, AiOutlineCheck } from "react-icons/ai";
 import { BiMessageCheck } from "react-icons/bi";
-import { GiCrownCoin } from "react-icons/gi";
+import { GiCrownCoin, GiPlanePilot } from "react-icons/gi";
 import { MdRequestQuote } from "react-icons/md";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { toast } from "react-toastify";
+import {
+  getMembershipPlan,
+  postAddMembershipPlan,
+} from "../../api/user/creatorApi";
+import ModifyPlanForm from "./Component/ModifyPlanForm";
+import DeletePlanBox from "./Component/DeletePlanBox";
 const SettingSubList = styled.div`
   width: 80%;
   height: 100%;
@@ -90,6 +99,12 @@ const MembershipNameLabel = styled.label`
     span {
       color: white;
       text-shadow: ${(props) => props.theme.textShadow};
+      small {
+        text-shadow: none;
+        font-size: 1.1vw;
+        color: ${(props) => props.theme.textRedColor};
+        margin-left: 1vw;
+      }
     }
     input[type="text"] {
       width: 60%;
@@ -130,6 +145,12 @@ const MembershipContentLabel = styled.label`
     span {
       color: white;
       text-shadow: ${(props) => props.theme.textShadow};
+      small {
+        margin-left: 1vw;
+        color: ${(props) => props.theme.textRedColor};
+        text-shadow: none;
+        font-size: 1.1vw;
+      }
     }
     textarea {
       height: 15vw;
@@ -170,6 +191,12 @@ const MembershipPriceSettingLabel = styled.label`
     span {
       color: white;
       text-shadow: ${(props) => props.theme.textShadow};
+      small {
+        text-shadow: none;
+        font-size: 1.1vw;
+        color: ${(props) => props.theme.textRedColor};
+        margin-left: 1.1vw;
+      }
     }
     div {
       display: flex;
@@ -239,7 +266,7 @@ const MembershipPriceSettingLabel = styled.label`
     }
   }
 `;
-const MembershipFunctionSettingBox = styled.div`
+const MembershipFunctionSettingBox = styled.div<MembershipSettingProps>`
   &#membership_function_box {
     display: flex;
     flex-direction: column;
@@ -256,10 +283,139 @@ const MembershipFunctionSettingBox = styled.div`
       display: flex;
       flex-direction: column;
       margin-top: 1vw;
+      .publish_setting_container {
+        label:nth-child(2) {
+          border: 1px solid
+            ${(props) =>
+              props?.publish === "publish_30days"
+                ? props.theme.accentColor
+                : "none"};
+          span {
+            color: ${(props) =>
+              props?.publish === "publish_30days"
+                ? props.theme.accentColor
+                : "white"};
+          }
+          .publish_check {
+            color: ${(props) =>
+              props?.publish === "publish_30days"
+                ? props.theme.accentColor
+                : "rgba(255,255,255,0.6)"};
+          }
+        }
+        label:nth-child(3) {
+          border: 1px solid
+            ${(props) =>
+              props?.publish === "publish_all"
+                ? props.theme.accentColor
+                : "none"};
+          span {
+            color: ${(props) =>
+              props?.publish === "publish_all"
+                ? props.theme.accentColor
+                : "white"};
+          }
+          .publish_check {
+            color: ${(props) =>
+              props?.publish === "publish_all"
+                ? props.theme.accentColor
+                : "rgba(255,255,255,0.6)"};
+          }
+        }
+      }
+      .free_msg_setting {
+        label:nth-child(2) {
+          border: 1px solid
+            ${(props) =>
+              props?.msg_setting === "free_msg_ok"
+                ? props.theme.accentColor
+                : "none"};
+          span {
+            color: ${(props) =>
+              props?.msg_setting === "free_msg_ok"
+                ? props.theme.accentColor
+                : "white"};
+          }
+          .msg_check {
+            color: ${(props) =>
+              props?.msg_setting === "free_msg_ok"
+                ? props.theme.accentColor
+                : "rgba(255,255,255,0.6)"};
+          }
+        }
+        label:nth-child(3) {
+          border: 1px solid
+            ${(props) =>
+              props?.msg_setting === "free_msg_not_ok"
+                ? props.theme.accentColor
+                : "none"};
+          span {
+            color: ${(props) =>
+              props?.msg_setting === "free_msg_not_ok"
+                ? props.theme.accentColor
+                : "white"};
+          }
+          .msg_check {
+            color: ${(props) =>
+              props?.msg_setting === "free_msg_not_ok"
+                ? props.theme.accentColor
+                : "rgba(255,255,255,0.6)"};
+          }
+        }
+      }
+      .request_setting {
+        label:nth-child(2) {
+          border: 1px solid
+            ${(props) =>
+              props?.request_setting === "request_ok"
+                ? props.theme.accentColor
+                : "none"};
+          span {
+            color: ${(props) =>
+              props?.request_setting === "request_ok"
+                ? props.theme.accentColor
+                : "white"};
+          }
+          .request_check {
+            color: ${(props) =>
+              props?.request_setting === "request_ok"
+                ? props.theme.accentColor
+                : "rgba(255,255,255,0.6)"};
+          }
+        }
+        label:nth-child(3) {
+          border: 1px solid
+            ${(props) =>
+              props?.request_setting === "request_not_ok"
+                ? props.theme.accentColor
+                : "none"};
+          span {
+            color: ${(props) =>
+              props?.request_setting === "request_not_ok"
+                ? props.theme.accentColor
+                : "white"};
+          }
+          .request_check {
+            color: ${(props) =>
+              props?.request_setting === "request_not_ok"
+                ? props.theme.accentColor
+                : "rgba(255,255,255,0.6)"};
+          }
+        }
+      }
     }
+
     #benefits_setting_components {
       display: flex;
       flex-direction: column;
+      span {
+        span {
+          color: ${(props) => props.theme.textRedColor};
+          text-shadow: none;
+          font-size: 1.1vw;
+          margin-left: 1vw;
+        }
+      }
       small {
         font-size: 1.1vw;
         text-shadow: none;
@@ -443,8 +599,10 @@ const PlanBox = styled(motion.div)`
     border-color: ${(props) => props.theme.accentColor};
   }
   #member_ship_title {
-    font-size: 1.2vw;
-    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.3vw;
+    font-weight: 600;
+    text-shadow: ${(props) => props.theme.textShadow};
+    color: ${(props) => props.theme.accentColor};
   }
   #member_ship_price {
     margin-top: 1vw;
@@ -501,133 +659,6 @@ const OverlayBox = styled(motion.div)`
   background-color: black;
   border-radius: 10px;
 `;
-const ModifyForm = styled.form`
-  width: 100%;
-  height: auto;
-  padding-bottom: 2vw;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
-  overflow-y: scroll;
-  display: flex;
-  flex-direction: column;
-`;
-const ModifyNameLabel = styled.label`
-  &#modify_plan_name_box {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    span {
-      color: white;
-      text-shadow: ${(props) => props.theme.textShadow};
-    }
-    input[type="text"] {
-      margin-top: 0.5vw;
-      width: 60%;
-      padding: 0.7vw 1vw;
-      background-color: black;
-      border-radius: 10px;
-      border: 1px solid white;
-      box-shadow: ${(props) => props.theme.boxShadow};
-      color: white;
-    }
-    input[type="text"]:focus {
-      outline: none;
-      border-color: ${(props) => props.theme.accentColor};
-    }
-  }
-`;
-const ModifyContentLabel = styled.label`
-  &#modify_plan_content_box {
-    margin-top: 1vw;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    span {
-      color: white;
-      text-shadow: ${(props) => props.theme.textShadow};
-    }
-    textarea {
-      width: 80%;
-      border: 1px solid white;
-      box-shadow: ${(props) => props.theme.textShadow};
-      height: 15vw;
-      border-radius: 10px;
-      color: white;
-      padding: 1vw;
-      margin-top: 0.5vw;
-      background-color: inherit;
-      white-space: pre-wrap;
-    }
-    textarea:focus {
-      outline: none;
-      border-color: ${(props) => props.theme.accentColor};
-    }
-  }
-`;
-const ModifySubmitLabel = styled.label`
-  margin-top: 2vw;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  &:hover {
-    cursor: pointer;
-    span {
-      border-color: ${(props) => props.theme.accentColor};
-      color: ${(props) => props.theme.accentColor};
-    }
-  }
-  span {
-    color: white;
-    text-shadow: ${(props) => props.theme.textShadow};
-    border: 1px solid red;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.5vw 0;
-    border: 1px solid white;
-    box-shadow: ${(props) => props.theme.textShadow};
-    border-radius: 10px;
-    transition: all 0.1s ease-in-out;
-  }
-
-  input[type="submit"] {
-    display: none;
-  }
-`;
-const DeletePlanBox = styled.div`
-  display: flex;
-  flex-direction: column;
-  margin-top: 2vw;
-  span {
-    text-shadow: ${(props) => props.theme.textShadow};
-    color: white;
-  }
-  p {
-    background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    padding: 1vw;
-    white-space: pre-wrap;
-    margin: 0.5vw 0;
-    font-size: 1vw;
-    color: white;
-  }
-  button {
-    width: 100%;
-    color: ${(props) => props.theme.textRedColor};
-    text-shadow: ${(props) => props.theme.textRedShadow};
-    padding: 1vw 0;
-    background-color: black;
-    border: 1px solid ${(props) => props.theme.textRedColor};
-    border-radius: 10px;
-    font-weight: 600;
-    font-size: 1.3vw;
-    margin-top: 1vw;
-    transition: all 0.1s ease-in-out;
-  }
-  button:hover {
-    cursor: pointer;
-    background-color: white;
-  }
-`;
 const toggleVariant = {
   start: {
     height: 0,
@@ -670,10 +701,116 @@ const boxVariant = {
     opacity: 0,
   },
 };
-
+interface MembershipSettingProps {
+  publish: null | string;
+  msg_setting: null | string;
+  request_setting: null | string;
+}
+interface PlanDataProps {
+  benefits_period: string | null;
+  benefits_msg: string | null;
+  benefits_request: string | null;
+  membershipDescription: string;
+  membershipName: string;
+  membership_price: number | string;
+  paid_message_value?: number | string;
+}
+interface DetailPlanDataProps {
+  _id: string;
+  owner: string;
+  planName: string;
+  planContent: string;
+  planPrice: number;
+  planBenefits: {
+    freeMessage: { allow: boolean; pricePerMsg: number };
+    period: boolean;
+    userRequestion: boolean;
+  };
+}
+const variant = {
+  start: {
+    height: 0,
+    opacity: 0,
+  },
+  end: {
+    height: "auto",
+    opacity: 1,
+    transition: {
+      duration: 0.2,
+    },
+  },
+  exit: {
+    height: 0,
+    opacity: 0,
+    // transition: {
+    //   duration: 0.2,
+    // },
+  },
+};
 function MembershipPlanSetting() {
   const [planToggle, setPlanToggle] = useState(false);
   const [planId, setPlanId] = useState<null | string>(null);
+  const { register, setError, formState, handleSubmit, watch, clearErrors } =
+    useForm<PlanDataProps>();
+  const { mutate, isLoading: addPlanLoading } = useMutation({
+    mutationFn: postAddMembershipPlan,
+    onSuccess: (data) => {
+      toast.success("멤버쉽 플랜을 저장했습니다");
+    },
+    onError: (error: any) => {
+      toast.error("멤버쉽 플랜을 저장하는데 문제가 발생했습니다");
+    },
+  });
+  const { isLoading: getPlanLoading, data: planData } = useQuery<
+    DetailPlanDataProps[]
+  >({
+    queryKey: ["creator", "planData"],
+    queryFn: getMembershipPlan,
+    staleTime: 5 * 60 * 1000,
+    cacheTime: Infinity,
+    meta: {
+      message: "플랜 데이터를 불러오는데 실패했습니다",
+    },
+  });
+  console.log("PlanId ?");
+  console.log(planId);
+  const onValid = (data: PlanDataProps) => {
+    // 사용자가 free message 기능을 사용하지 않음
+    if (data.paid_message_value === "") {
+      setError("paid_message_value", {
+        message: "코인을 입력해주세요",
+      });
+      return;
+    }
+    if (
+      Number(data.paid_message_value) <= 0 ||
+      Number(data.paid_message_value) > 10
+    ) {
+      setError("paid_message_value", {
+        message: "1이상 10 이하의 코인을 입력해주세요",
+      });
+      return;
+    }
+    let addPlanData = {
+      benefits_period: data.benefits_period,
+      benefits_msg: data.benefits_msg,
+      benefits_request: data.benefits_request,
+      membershipDescription: data.membershipDescription,
+      membershipName: data.membershipName,
+      membership_price: Number(data.membership_price),
+      paid_message_value: 0,
+    };
+    if (data.benefits_msg === "free_msg_not_ok") {
+      if (!data.paid_message_value) {
+        setError("paid_message_value", {
+          message: "메세지당 코인 값을 입력해주세요",
+        });
+        return;
+      }
+      addPlanData.paid_message_value = Number(data.paid_message_value);
+    }
+    mutate(addPlanData);
+  };
   return (
     <>
       <SettingSubList>
@@ -691,13 +828,22 @@ function MembershipPlanSetting() {
               initial="start"
               animate="end"
               exit="exit"
+              onSubmit={handleSubmit(onValid)}
             >
               <MembershipNameLabel
                 id="membership_name"
                 htmlFor="membership_name"
               >
-                <span>멤버쉽 이름</span>
+                <span>
+                  멤버쉽 이름
+                  {formState.errors?.membershipName ? (
+                    <small>{formState.errors.membershipName.message}</small>
+                  ) : null}
+                </span>
                 <input
+                  {...register("membershipName", {
+                    required: "멤버쉽 이름을 작성해주세요",
+                  })}
                   type="text"
                   id="membership_name"
                   placeholder="멤버쉽 이름을 설정해주세요"
@@ -711,9 +857,18 @@ function MembershipPlanSetting() {
                 id="membership_content"
                 htmlFor="membership_content"
               >
-                <span>멤버쉽 내용</span>
+                <span>
+                  멤버쉽 내용
+                  {formState.errors?.membershipDescription ? (
+                    <small>
+                      {formState.errors.membershipDescription.message}
+                    </small>
+                  ) : null}
+                </span>
                 <textarea
-                  name=""
+                  {...register("membershipDescription", {
+                    required: "멤버쉽 설명글을 작성해주세요",
+                  })}
                   id="membership_content"
                   placeholder={`자세한 멤버쉽 내용을 적어주세요.
 ex) 
@@ -728,10 +883,24 @@ ex)
                 <small>해당 플랜을 잘 설명해주는 설명을 적어주세요</small>
               </MembershipContentLabel>
               <MembershipPriceSettingLabel id="membership_price_setting">
-                <span>멤버쉽 가격 설정</span>
+                <span>
+                  멤버쉽 가격 설정
+                  {formState.errors?.membership_price ? (
+                    <small>{formState.errors.membership_price.message}</small>
+                  ) : null}
+                </span>
                 <div>
                   <span>월</span>
-                  <input type="number" />
+                  <input
+                    {...register("membership_price", {
+                      required: "가격을 입력해주세요",
+                      min: {
+                        value: 1000,
+                        message: "가격은 최소 1000원 이상입니다",
+                      },
+                    })}
+                    type="number"
+                  />
                   <span>₩</span>
                 </div>
                 <small>
@@ -745,28 +914,47 @@ ex)
                   </span>
                 </small>
               </MembershipPriceSettingLabel>
-              <MembershipFunctionSettingBox id="membership_function_box">
+              <MembershipFunctionSettingBox
+                id="membership_function_box"
+                publish={watch("benefits_period")}
+                msg_setting={watch("benefits_msg")}
+                request_setting={watch("benefits_request")}
+              >
                 <span>멤버쉽 혜택 설정</span>
                 <div id="benefits_setting_box">
-                  <div id="benefits_setting_components">
+                  <div
+                    id="benefits_setting_components"
+                    className="publish_setting_container"
+                  >
                     <span>
                       <FiAlertCircle />
                       유료 컨텐츠 공개제한
+                      {formState.errors?.benefits_period ? (
+                        <span>{formState.errors.benefits_period.message}</span>
+                      ) : null}
                     </span>
                     <label htmlFor="publish_30days">
                       <span>멤버쉽 가입 30일 전 컨텐츠까지 공개</span>
-                      <AiOutlineCheck />
+                      <AiOutlineCheck className="publish_check" />
                       <input
+                        {...register("benefits_period", {
+                          required: "유료 컨텐츠 공개제한을 선택해주세요",
+                        })}
                         id="publish_30days"
+                        value="publish_30days"
                         type="radio"
                         name="benefits_period"
                       />
                     </label>
                     <label htmlFor="publish_all">
                       <span>모든 기간 컨텐츠 공개</span>
-                      <AiOutlineCheck />
+                      <AiOutlineCheck className="publish_check" />
                       <input
+                        {...register("benefits_period", {
+                          required: "유료 컨텐츠 공개제한을 선택해주세요",
+                        })}
                         id="publish_all"
+                        value="publish_all"
                         type="radio"
                         name="benefits_period"
                       />
@@ -775,54 +963,93 @@ ex)
 
                   <div
                     id="benefits_setting_components"
-                    className="benefits_message"
+                    className="benefits_message free_msg_setting"
                   >
                     <span>
                       <BiMessageCheck />
                       메세지 설정하기
+                      {formState.errors?.benefits_msg ? (
+                        <span>{formState.errors.benefits_msg.message}</span>
+                      ) : null}
                     </span>
                     <label htmlFor="free_msg_ok">
-                      <span>무료 메세지 가능</span>
-                      <AiOutlineCheck />
+                      <span>무제한 무료 메세지</span>
+                      <AiOutlineCheck className="msg_check" />
                       <input
+                        {...register("benefits_msg", {
+                          required: "유료 메세지를 설정해주세요",
+                        })}
                         id="free_msg_ok"
+                        value="free_msg_ok"
                         type="radio"
                         name="benefits_msg"
                       />
                     </label>
                     <label htmlFor="free_msg_not_ok">
-                      <span>유료 메세지만 가능</span>
-                      <AiOutlineCheck />
+                      <span>무료 메세지 사용 후 유료 메세지만 가능</span>
+                      <AiOutlineCheck className="msg_check" />
                       <input
+                        {...register("benefits_msg", {
+                          required: "유료 메세지를 설정해주세요",
+                        })}
                         id="free_msg_not_ok"
+                        value="free_msg_not_ok"
                         type="radio"
                         name="benefits_msg"
                       />
                     </label>
-                    <div id="paid_message_setting_box">
-                      <span>코인 설정</span>
-                      <div>
-                        <span>
-                          <GiCrownCoin />
-                        </span>
-                        <input type="number" />
-                        <span>메세지당</span>
-                      </div>
-                    </div>
+                    <AnimatePresence custom={watch("benefits_msg")}>
+                      {watch("benefits_msg") === "free_msg_not_ok" ? (
+                        <motion.div
+                          id="paid_message_setting_box"
+                          variants={variant}
+                          initial="start"
+                          animate="end"
+                          exit="exit"
+                        >
+                          <span>
+                            코인 설정
+                            {formState.errors?.paid_message_value ? (
+                              <span>
+                                {formState.errors.paid_message_value.message}
+                              </span>
+                            ) : null}
+                          </span>
+                          <div>
+                            <span>
+                              <GiCrownCoin />
+                            </span>
+                            <input
+                              {...register("paid_message_value")}
+                              onFocus={() => clearErrors("paid_message_value")}
+                              type="number"
+                            />
+                            <span>메세지당</span>
+                          </div>
+                        </motion.div>
+                      ) : null}
+                    </AnimatePresence>
                   </div>
 
                   <div
                     id="benefits_setting_components"
-                    className="benefits_message"
+                    className="benefits_message request_setting"
                   >
                     <span>
                       <MdRequestQuote />
                       리퀘스트 설정
+                      {formState.errors?.benefits_request ? (
+                        <span>{formState.errors.benefits_request.message}</span>
+                      ) : null}
                     </span>
                     <label htmlFor="request_ok">
                       <span>리퀘스트 신청 가능</span>
-                      <AiOutlineCheck />
+                      <AiOutlineCheck className="request_check" />
                       <input
+                        {...register("benefits_request", {
+                          required: "리퀘스트 가능 여부를 선택해주세요",
+                        })}
+                        value="request_ok"
                         id="request_ok"
                         type="radio"
                         name="benefits_request"
@@ -830,8 +1057,12 @@ ex)
                     </label>
                     <label htmlFor="request_not_ok">
                       <span>리퀘스트 신청 불가능</span>
-                      <AiOutlineCheck />
+                      <AiOutlineCheck className="request_check" />
                       <input
+                        {...register("benefits_request", {
+                          required: "리퀘스트 가능 여부를 선택해주세요",
+                        })}
+                        value="request_not_ok"
                         id="request_not_ok"
                         type="radio"
                         name="benefits_request"
@@ -850,10 +1081,10 @@ ex)
               </MembershipFunctionSettingBox>
               <MembershipSubmitLabel
                 id="membership_apply"
-                htmlFor="membership_apply"
+                htmlFor="membership_submit"
               >
                 <span>저장하기</span>
-                <input type="submit" id="membership_apply" />
+                <input type="submit" id="membership_submit" />
               </MembershipSubmitLabel>
             </MembershipSettingForm>
           ) : null}
@@ -861,38 +1092,38 @@ ex)
         <CurrentPlanBox id="current_plan_box">
           <h3>진행중인 플랜</h3>
           <small>클릭해서 플랜을 수정할 수 있습니다</small>
-          <PlanBox layoutId="lv1" onClick={() => setPlanId("lv1")}>
-            <h2 id="member_ship_title">1. 멤버쉽 이름</h2>
-            <h3 id="member_ship_price">₩70,000 / 월</h3>
-            <div id="craetor_setting_msg">
-              <span>크리에이터가 지정 메세지</span>
-              <span>유료채팅 3회</span>
-              <span>더나은 더보기</span>
-              <span>아무게 아무게</span>
-            </div>
-            <div id="official_setting">
-              <div id="official_notice_box">
-                <span>🟢 크리에이터에게 유료채팅</span>
-                <span>🟢 결제 30일 이전 포스팅까지 공개</span>
-              </div>
-            </div>
-          </PlanBox>
-          <PlanBox>
-            <h2 id="member_ship_title">1. 멤버쉽 이름</h2>
-            <h3 id="member_ship_price">₩70,000 / 월</h3>
-            <div id="craetor_setting_msg">
-              <span>크리에이터가 지정 메세지</span>
-              <span>유료채팅 3회</span>
-              <span>더나은 더보기</span>
-              <span>아무게 아무게</span>
-            </div>
-            <div id="official_setting">
-              <div id="official_notice_box">
-                <span>🟢 크리에이터에게 유료채팅</span>
-                <span>🟢 결제 30일 이전 포스팅까지 공개</span>
-              </div>
-            </div>
-          </PlanBox>
+          {planData?.map((plan, idx) => {
+            return (
+              <PlanBox
+                key={plan._id}
+                layoutId={plan._id}
+                onClick={() => setPlanId(plan._id)}
+              >
+                <h2 id="member_ship_title">{`${idx + 1}. ${plan.planName}`}</h2>
+                <h3 id="member_ship_price">{`₩${plan.planPrice} / 월`}</h3>
+                <div id="craetor_setting_msg">
+                  <span>{plan.planContent}</span>
+                </div>
+                <div id="official_setting">
+                  <div id="official_notice_box">
+                    <span>{`${
+                      plan.planBenefits.period
+                        ? "🟢 결제 30일 이전 포스팅까지 공개"
+                        : "🟢 모든 포스트 열람가능"
+                    }`}</span>
+                    <span>{`${
+                      plan.planBenefits.freeMessage
+                        ? "🟢 크리에이터에게 무료채팅"
+                        : "🟢 크리에이터에게 유료채팅"
+                    }`}</span>
+                    {plan.planBenefits.userRequestion ? (
+                      <span>🟢 크리에이터에게 리퀘스트 신청가능</span>
+                    ) : null}
+                  </div>
+                </div>
+              </PlanBox>
+            );
+          })}
         </CurrentPlanBox>
       </SettingSubList>
       <AnimatePresence>
@@ -912,49 +1143,13 @@ ex)
               exit="exit"
               onClick={(event) => event.stopPropagation()}
             >
-              <ModifyForm>
-                <ModifyNameLabel
-                  htmlFor="modify_plan_name"
-                  id="modify_plan_name_box"
-                >
-                  <span>플랜 이름</span>
-                  <input
-                    id="modify_plan_name"
-                    type="text"
-                    value="클릭한 플랜의 제목을 가져옵니다."
-                  />
-                </ModifyNameLabel>
-                <ModifyContentLabel
-                  htmlFor="modify_plan_content"
-                  id="modify_plan_content_box"
-                >
-                  <span>플랜 내용</span>
-                  <textarea
-                    id="modify_plan_content"
-                    value="클릭한 플랜의 내용을 가져옵니다"
-                  ></textarea>
-                </ModifyContentLabel>
-                <ModifySubmitLabel htmlFor="modify_plan_submit">
-                  <span>플랜 수정하기</span>
-                  <input id="modify_plan_submit" type="submit" />
-                </ModifySubmitLabel>
-              </ModifyForm>
-              <DeletePlanBox>
-                <span>플랜삭제하기</span>
-                <p>
-                  {`플랜 삭제에 대한 블라 블라 설명글이 들어갑니다
-                    블라블라 블라블라
-                    브랇ㄴ블르르르
-                    ㄴㅁㅇㅁㄴㅇㅁㄴㅇㅁ넝ㄴㅁ언ㅁ언ㅁ어ㅑ
-                    ㅁㄴ엄ㄴ언ㅁ야넘언ㅁ다파ㅓ랴;채퍄ㅓㄴㅂ어ㅓ냐ㅗ넌마
-                  `}
-                </p>
-                <button>플랜 삭제하기</button>
-              </DeletePlanBox>
+              <ModifyPlanForm planId={planId} />
+              <DeletePlanBox />
             </OverlayBox>
           </Overlay>
         ) : null}
       </AnimatePresence>
+      s
     </>
   );
 }

@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 const membershipPlanSchema = new mongoose.Schema({
+  owner: { type: mongoose.Schema.Types.ObjectId, ref: "Creator" },
   planName: { type: String },
   planContent: { type: String },
   planPrice: { type: Number, required: true },
