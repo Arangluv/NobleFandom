@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  deletePlan,
   getMessageSetting,
   getPlanData,
   postAddMembershipPlan,
@@ -14,4 +15,5 @@ creatorRouter.route("/post-edit-messagesetting").post(postEditMessageSetting);
 creatorRouter.route("/add-membership-plan").post(postAddMembershipPlan);
 creatorRouter.route("/get-plandata").get(getPlanData);
 creatorRouter.route("/modify-plan").post(postEditPlan);
+creatorRouter.route("/delete-plan").delete(deletePlan);
 export default creatorRouter;

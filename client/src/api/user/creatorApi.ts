@@ -22,6 +22,9 @@ interface ModifyPlanProps {
   planContent: string;
   planId: string;
 }
+interface DeletePlanProps {
+  planId: string;
+}
 export const getMessageSetting = async () => {
   return await axios({
     url: `${BASE_URL}/creators/get-messagesetting`,
@@ -77,5 +80,14 @@ export const postEditMembershipPlan = async (modifiedPlan: ModifyPlanProps) => {
     method: "POST",
     data: modifiedPlan,
     withCredentials: true,
+  });
+};
+
+export const deleteMembershipPlan = async (planId: DeletePlanProps) => {
+  return await axios({
+    url: `${BASE_URL}/creators/delete-plan`,
+    method: "DELETE",
+    withCredentials: true,
+    data: planId,
   });
 };

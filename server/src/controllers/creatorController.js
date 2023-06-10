@@ -143,3 +143,22 @@ export const postEditPlan = async (req, res) => {
       .json({ message: "플랜을 수정하는데 문제가 발생했습니다" });
   }
 };
+
+export const deletePlan = async (req, res) => {
+  try {
+    const { planId } = req.body;
+    const { token } = req.cookies;
+    const { secretKey } = jwtConfig;
+    const creatorInfo = await jwt.verify(token, secretKey);
+    const { id } = creatorInfo;
+    await Creator.findOneAndUpdate(
+      { _id: id },
+      { $pull: { membershipPlan: planId } }
+    );
+    await MembershipPlan.findOneAndDelete({ owner: id, _id: planId });
+    return res.status(200).send();
+  } catch (error) {
+    console.log(error);
+    return res.status(404).json({ message: error.message });
+  }
+};

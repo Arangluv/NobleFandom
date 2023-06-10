@@ -7,7 +7,7 @@ import { MdRequestQuote } from "react-icons/md";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import {
   getMembershipPlan,
@@ -79,6 +79,15 @@ const NewPlanToggle = styled.button`
     cursor: pointer;
     border-color: ${(props) => props.theme.accentColor};
     color: ${(props) => props.theme.accentColor};
+  }
+`;
+const MaxPlanAlarm = styled.div`
+  margin-top: 2vw;
+  display: flex;
+  justify-content: center;
+  span {
+    text-align: center;
+    color: ${(props) => props.theme.textRedColor};
   }
 `;
 const MembershipSettingForm = styled(motion.form)`
@@ -577,6 +586,10 @@ const CurrentPlanBox = styled.div`
       text-shadow: ${(props) => props.theme.textShadow};
       margin-bottom: 0;
     }
+    #notice_empty_plan {
+      color: rgba(255, 255, 255, 0.5);
+      text-align: center;
+    }
     small {
       margin-top: 0;
       color: ${(props) => props.theme.accentColor};
@@ -615,9 +628,12 @@ const PlanBox = styled(motion.div)`
     flex-direction: column;
     margin-top: 0.5vw;
     span {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
       font-size: 1.1vw;
       color: white;
-      padding-left: 1vw;
+      padding: 1vw;
+      white-space: pre-wrap;
     }
   }
   #official_setting {
@@ -748,19 +764,26 @@ const variant = {
   },
 };
 function MembershipPlanSetting() {
+  const queryClient = useQueryClient();
   const [planToggle, setPlanToggle] = useState(false);
   const [planId, setPlanId] = useState<null | string>(null);
   const { register, setError, formState, handleSubmit, watch, clearErrors } =
     useForm<PlanDataProps>();
+
   const { mutate, isLoading: addPlanLoading } = useMutation({
     mutationFn: postAddMembershipPlan,
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast.success("멤버쉽 플랜을 저장했습니다");
+      setPlanToggle(false);
+      return queryClient.invalidateQueries({
+        queryKey: ["creator", "planData"],
+      });
     },
-    onError: (error: any) => {
+    onError: () => {
       toast.error("멤버쉽 플랜을 저장하는데 문제가 발생했습니다");
     },
   });
+
   const { isLoading: getPlanLoading, data: planData } = useQuery<
     DetailPlanDataProps[]
   >({
@@ -772,8 +795,6 @@ function MembershipPlanSetting() {
       message: "플랜 데이터를 불러오는데 실패했습니다",
     },
   });
-  console.log("PlanId ?");
-  console.log(planId);
   const onValid = (data: PlanDataProps) => {
     // 사용자가 free message 기능을 사용하지 않음
     if (data.paid_message_value === "") {
@@ -818,9 +839,15 @@ function MembershipPlanSetting() {
           <h2>멤버쉽 플랜 설정하기</h2>
           <small>구독자에게 단계별 플랜을 제공해보세요</small>
         </Title>
-        <NewPlanToggle onClick={() => setPlanToggle((pre) => !pre)}>
-          <AiOutlinePlus />새 플랜 만들기
-        </NewPlanToggle>
+        {planData?.length === 3 ? (
+          <MaxPlanAlarm>
+            <span>알람은 최대 3개까지 만들 수 있습니다</span>
+          </MaxPlanAlarm>
+        ) : (
+          <NewPlanToggle onClick={() => setPlanToggle((pre) => !pre)}>
+            <AiOutlinePlus />새 플랜 만들기
+          </NewPlanToggle>
+        )}
         <AnimatePresence>
           {planToggle ? (
             <MembershipSettingForm
@@ -1092,38 +1119,44 @@ ex)
         <CurrentPlanBox id="current_plan_box">
           <h3>진행중인 플랜</h3>
           <small>클릭해서 플랜을 수정할 수 있습니다</small>
-          {planData?.map((plan, idx) => {
-            return (
-              <PlanBox
-                key={plan._id}
-                layoutId={plan._id}
-                onClick={() => setPlanId(plan._id)}
-              >
-                <h2 id="member_ship_title">{`${idx + 1}. ${plan.planName}`}</h2>
-                <h3 id="member_ship_price">{`₩${plan.planPrice} / 월`}</h3>
-                <div id="craetor_setting_msg">
-                  <span>{plan.planContent}</span>
-                </div>
-                <div id="official_setting">
-                  <div id="official_notice_box">
-                    <span>{`${
-                      plan.planBenefits.period
-                        ? "🟢 결제 30일 이전 포스팅까지 공개"
-                        : "🟢 모든 포스트 열람가능"
-                    }`}</span>
-                    <span>{`${
-                      plan.planBenefits.freeMessage
-                        ? "🟢 크리에이터에게 무료채팅"
-                        : "🟢 크리에이터에게 유료채팅"
-                    }`}</span>
-                    {plan.planBenefits.userRequestion ? (
-                      <span>🟢 크리에이터에게 리퀘스트 신청가능</span>
-                    ) : null}
+          {planData?.length === 0 ? (
+            <span id="notice_empty_plan">등록된 플랜이 없습니다</span>
+          ) : (
+            planData?.map((plan, idx) => {
+              return (
+                <PlanBox
+                  key={plan._id}
+                  layoutId={plan._id}
+                  onClick={() => setPlanId(plan._id)}
+                >
+                  <h2 id="member_ship_title">{`${idx + 1}. ${
+                    plan.planName
+                  }`}</h2>
+                  <h3 id="member_ship_price">{`₩ ${plan.planPrice} / 월`}</h3>
+                  <div id="craetor_setting_msg">
+                    <span>{plan.planContent}</span>
                   </div>
-                </div>
-              </PlanBox>
-            );
-          })}
+                  <div id="official_setting">
+                    <div id="official_notice_box">
+                      <span>{`${
+                        plan.planBenefits.period
+                          ? "🟢 결제 30일 이전 포스팅까지 공개"
+                          : "🟢 모든 포스트 열람가능"
+                      }`}</span>
+                      <span>{`${
+                        plan.planBenefits.freeMessage.allow
+                          ? "🟢 크리에이터에게 무료채팅"
+                          : "🟢 크리에이터에게 유료채팅"
+                      }`}</span>
+                      {plan.planBenefits.userRequestion ? (
+                        <span>🟢 크리에이터에게 리퀘스트 신청가능</span>
+                      ) : null}
+                    </div>
+                  </div>
+                </PlanBox>
+              );
+            })
+          )}
         </CurrentPlanBox>
       </SettingSubList>
       <AnimatePresence>
@@ -1144,7 +1177,7 @@ ex)
               onClick={(event) => event.stopPropagation()}
             >
               <ModifyPlanForm planId={planId} />
-              <DeletePlanBox />
+              <DeletePlanBox planId={planId} setPlanId={setPlanId} />
             </OverlayBox>
           </Overlay>
         ) : null}
